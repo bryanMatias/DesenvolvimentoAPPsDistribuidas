@@ -6,7 +6,7 @@
     <!-- Sidebar - Brand -->
     <a
       class="sidebar-brand d-flex align-items-center justify-content-center"
-      href="index.html"
+      href="/#/"
     >
       <div class="sidebar-brand-icon rotate-n-15">
         <i class="fas fa-hamburger"></i>
@@ -19,7 +19,7 @@
 
     <!-- Nav Item - Dashboard -->
     <li class="nav-item">
-      <a class="nav-link" href="#">
+      <a class="nav-link" href="/#/">
         <i class="fas fa-fw fa-tachometer-alt"></i>
         <span>Dashboard</span></a
       >
@@ -33,7 +33,7 @@
 
     <!-- Nav Item - Profile -->
     <li class="nav-item">
-      <a class="nav-link" href="#">
+      <a class="nav-link" href="/#/">
         <i class="fas fa-fw fa-user"></i>
         <span>Profile</span>
       </a>
@@ -41,9 +41,31 @@
 
     <!-- Nav Item - About -->
     <li class="nav-item">
-      <a class="nav-link" href="#">
+      <a class="nav-link" href="/#/">
         <i class="fas fa-fw fa-hands-helping"></i>
         <span>About</span>
+      </a>
+    </li>
+
+    <!-- Divider -->
+    <hr class="sidebar-divider d-none d-md-block" />
+
+    <!-- Heading -->
+    <div class="sidebar-heading">Web Developer</div>
+
+    <!-- Nav Item - Profile -->
+    <li class="nav-item">
+      <a class="nav-link" href="/#/">
+        <i class="fas fa-table"></i>
+        <span>Users table</span>
+      </a>
+    </li>
+
+    <!-- Nav Item - About -->
+    <li class="nav-item">
+      <a class="nav-link" href="/#/">
+        <i class="fas fa-table"></i>
+        <span>Products table</span>
       </a>
     </li>
 
@@ -55,7 +77,7 @@
 
     <!-- Nav Item - Profile -->
     <li class="nav-item">
-      <a class="nav-link" href="#">
+      <a class="nav-link" href="/#/">
         <i class="fas fa-fw fa-user"></i>
         <span>Profile</span>
       </a>
@@ -63,7 +85,7 @@
 
     <!-- Nav Item - About -->
     <li class="nav-item">
-      <a class="nav-link" href="#">
+      <a class="nav-link" href="/#/">
         <i class="fas fa-fw fa-hands-helping"></i>
         <span>About</span>
       </a>
@@ -77,7 +99,7 @@
 
     <!-- Nav Item - Profile -->
     <li class="nav-item">
-      <a class="nav-link" href="#">
+      <a class="nav-link" href="/#/">
         <i class="fas fa-fw fa-user"></i>
         <span>Profile</span>
       </a>
@@ -85,7 +107,7 @@
 
     <!-- Nav Item - About -->
     <li class="nav-item">
-      <a class="nav-link" href="#">
+      <a class="nav-link" href="/#/">
         <i class="fas fa-fw fa-hands-helping"></i>
         <span>About</span>
       </a>
@@ -99,7 +121,7 @@
 
     <!-- Nav Item - Profile -->
     <li class="nav-item">
-      <a class="nav-link" href="#">
+      <a class="nav-link" href="/#/">
         <i class="fas fa-fw fa-user"></i>
         <span>Profile</span>
       </a>
@@ -107,11 +129,14 @@
 
     <!-- Nav Item - About -->
     <li class="nav-item">
-      <a class="nav-link" href="#">
+      <a class="nav-link" href="/#/">
         <i class="fas fa-fw fa-hands-helping"></i>
         <span>About</span>
       </a>
     </li>
+
+    <!-- Divider -->
+    <hr class="sidebar-divider d-none d-md-block" />
 
     <!-- Divider -->
     <hr class="sidebar-divider d-none d-md-block" />

@@ -1,42 +1,66 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+@extends('master')
 
-<head>
-    <!-- Required meta tags -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="Laravel SB Admin 2">
-    <meta name="author" content="Alejandro RH">
+@section('title', 'Vue.js App')
 
-    <!-- CSRF Token -->
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+@section('content')
 
-    <title>Food@Home</title>
+<!-- Page Wrapper -->
+<div id="wrapper">
 
-    <!-- Fonts -->
-    <link href="{{ asset('vendor/fontawesome-free/css/all.min.css') }}" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+  <sidebar></sidebar>
 
-    <!-- Styles -->
-    <link href="{{ asset('css/sb-admin-2.min.css') }}" rel="stylesheet">
+  <!-- Content Wrapper -->
+  <div id="content-wrapper" class="d-flex flex-column">
 
-    <!-- Favicon -->
-    <link href="{{ asset('img/favicon.png') }}" rel="icon" type="image/png">
-</head>
+    <!-- Main Content -->
+    <div id="content">
 
-<body id="page-top">
+      <topbar></topbar>
 
-    <div id="app">
-        <app></app>   
-    </div> 
+      <router-view></router-view>
 
-    <!-- Scripts -->
-    <script src="{{ asset('vendor/jquery/jquery.min.js') }}"></script>
-    <script src="{{ asset('vendor/bootstrap/js/bootstrap.min.js') }}"></script>
-    <script src="{{ asset('vendor/jquery-easing/jquery.easing.min.js') }}"></script>
-    <script src="{{ asset('js/sb-admin-2.min.js') }}"></script>
+    </div>
+    <!-- End of Main Content -->
 
-    <script src="js/app.js"></script>
-</body>
+    <foot></foot>
 
-</html>
+  </div>
+  <!-- End of Content Wrapper -->
+
+</div>
+
+<!-- Scroll to Top Button-->
+<a class="scroll-to-top rounded" href="#page-top">
+  <i class="fas fa-angle-up"></i>
+</a>
+
+<!-- Logout Modal-->
+<div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
+        <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        Select "Logout" below if you are ready to end your current session.
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-link" type="button" data-dismiss="modal">
+          Cancel
+        </button>
+        <a class="btn btn-danger" href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Logout</a>
+        <form id="logout-form" action="#" method="POST" style="display: none">
+          @csrf
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+@endsection
+@section('pagescript')
+<script src="js/app.js"></script>
+@stop
