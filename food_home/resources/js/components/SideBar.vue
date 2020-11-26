@@ -19,7 +19,7 @@
 
     <!-- Nav Item - Dashboard -->
     <li class="nav-item">
-      <a class="nav-link" href="/#/">
+      <a class="nav-link" href="/#/dashboard">
         <i class="fas fa-fw fa-tachometer-alt"></i>
         <span>Dashboard</span></a
       >
@@ -53,9 +53,9 @@
     <!-- Heading -->
     <div class="sidebar-heading">Web Developer</div>
 
-    <!-- Nav Item - Profile -->
+    <!-- Nav Item - About -->
     <li class="nav-item">
-      <a class="nav-link" href="/#/">
+      <a class="nav-link" href="/#/dev/users">
         <i class="fas fa-table"></i>
         <span>Users table</span>
       </a>
@@ -66,6 +66,14 @@
       <a class="nav-link" href="/#/">
         <i class="fas fa-table"></i>
         <span>Products table</span>
+      </a>
+    </li>
+
+    <!-- Nav Item - About -->
+    <li class="nav-item">
+      <a class="nav-link" href="/#/">
+        <i class="fas fa-table"></i>
+        <span>Orders table</span>
       </a>
     </li>
 

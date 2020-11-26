@@ -9,7 +9,11 @@ Vue.use(VueRouter)
 
 import AppComponent from './App.vue'
 import HomeComponent from './pages/Home.vue'
+import DashboardComponent from './pages/Dashboard.vue'
+
 import ProductsComponent from './pages/Products.vue'
+
+import UsersComponent from './developer/Users.vue'
 
 import SideBarComponent from "./components/SideBar.vue"
 import TopBarComponent from "./components/TopBar.vue"
@@ -21,7 +25,12 @@ Vue.component('foot', FooterComponent)
 
 const routes = [
     {path:'/', component:HomeComponent},
+    {path:'/dashboard', component:DashboardComponent},
+    
     {path:'/products', component:ProductsComponent},
+
+    {path:'/dev/users', component:UsersComponent},
+
     {path:'/example', component:AppComponent},
 ]
 

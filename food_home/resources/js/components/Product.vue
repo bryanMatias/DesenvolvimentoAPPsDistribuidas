@@ -6,9 +6,9 @@
     <div class="card-body">PHOTO</div>
     <div class="card-footer">
       <ul>
-        <li>Type: {{ product.type }}</li>
+        <li>Tipo: {{ product.type }}</li>
         <!-- <li>Description: {{ product.description }}</li> -->
-        <li>Price: {{ product.price }}€</li>
+        <li>Preço: {{ product.price }}€</li>
       </ul>
     </div>
   </div>
