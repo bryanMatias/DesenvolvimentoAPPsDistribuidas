@@ -12,6 +12,12 @@ use App\Models\Customer;
 
 class UserController extends Controller
 {
+
+    public function GetAuthUser(Request $request)
+    {
+        return $request->user();
+    }
+
     public function GetAllUsers()
     {
         return User::all();

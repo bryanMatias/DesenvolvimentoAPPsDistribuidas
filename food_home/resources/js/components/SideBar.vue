@@ -6,7 +6,7 @@
     <!-- Sidebar - Brand -->
     <a
       class="sidebar-brand d-flex align-items-center justify-content-center"
-      href="/#/"
+      href="/#/welcome"
     >
       <div class="sidebar-brand-icon rotate-n-15">
         <i class="fas fa-hamburger"></i>
@@ -18,7 +18,7 @@
     <hr class="sidebar-divider my-0" />
 
     <!-- Nav Item - Dashboard -->
-    <li class="nav-item">
+    <li class="nav-item" v-if="isNotClient">
       <a class="nav-link" href="/#/dashboard">
         <i class="fas fa-fw fa-tachometer-alt"></i>
         <span>Dashboard</span></a
@@ -33,7 +33,7 @@
 
     <!-- Nav Item - Profile -->
     <li class="nav-item">
-      <a class="nav-link" href="/#/">
+      <a class="nav-link" href="/#/welcome">
         <i class="fas fa-fw fa-user"></i>
         <span>Profile</span>
       </a>
@@ -41,7 +41,7 @@
 
     <!-- Nav Item - About -->
     <li class="nav-item">
-      <a class="nav-link" href="/#/">
+      <a class="nav-link" href="/#/welcome">
         <i class="fas fa-fw fa-hands-helping"></i>
         <span>About</span>
       </a>
@@ -63,7 +63,7 @@
 
     <!-- Nav Item - About -->
     <li class="nav-item">
-      <a class="nav-link" href="/#/">
+      <a class="nav-link" href="/#/welcome">
         <i class="fas fa-table"></i>
         <span>Products table</span>
       </a>
@@ -71,7 +71,7 @@
 
     <!-- Nav Item - About -->
     <li class="nav-item">
-      <a class="nav-link" href="/#/">
+      <a class="nav-link" href="/#/welcome">
         <i class="fas fa-table"></i>
         <span>Orders table</span>
       </a>
@@ -80,71 +80,68 @@
     <!-- Divider -->
     <hr class="sidebar-divider d-none d-md-block" />
 
-    <!-- Heading -->
-    <div class="sidebar-heading">Manager</div>
+    <div v-if="isManager">
+      <!-- Heading -->
+      <div class="sidebar-heading">Manager</div>
 
-    <!-- Nav Item - Profile -->
-    <li class="nav-item">
-      <a class="nav-link" href="/#/">
-        <i class="fas fa-fw fa-user"></i>
-        <span>Profile</span>
-      </a>
-    </li>
+      <!-- Nav Item - Profile -->
+      <li class="nav-item">
+        <a class="nav-link" href="/#/welcome">
+          <i class="fas fa-fw fa-user"></i>
+          <span>Profile</span>
+        </a>
+      </li>
 
-    <!-- Nav Item - About -->
-    <li class="nav-item">
-      <a class="nav-link" href="/#/">
-        <i class="fas fa-fw fa-hands-helping"></i>
-        <span>About</span>
-      </a>
-    </li>
+      <!-- Nav Item - About -->
+      <li class="nav-item">
+        <a class="nav-link" href="/#/welcome">
+          <i class="fas fa-fw fa-hands-helping"></i>
+          <span>About</span>
+        </a>
+      </li>
+    </div>
 
-    <!-- Divider -->
-    <hr class="sidebar-divider d-none d-md-block" />
+    <div v-else-if="isCooker">
+      <!-- Heading -->
+      <div class="sidebar-heading">Cooker</div>
 
-    <!-- Heading -->
-    <div class="sidebar-heading">Cooker</div>
+      <!-- Nav Item - Profile -->
+      <li class="nav-item">
+        <a class="nav-link" href="/#/welcome">
+          <i class="fas fa-fw fa-user"></i>
+          <span>Profile</span>
+        </a>
+      </li>
 
-    <!-- Nav Item - Profile -->
-    <li class="nav-item">
-      <a class="nav-link" href="/#/">
-        <i class="fas fa-fw fa-user"></i>
-        <span>Profile</span>
-      </a>
-    </li>
+      <!-- Nav Item - About -->
+      <li class="nav-item">
+        <a class="nav-link" href="/#/welcome">
+          <i class="fas fa-fw fa-hands-helping"></i>
+          <span>About</span>
+        </a>
+      </li>
+    </div>
 
-    <!-- Nav Item - About -->
-    <li class="nav-item">
-      <a class="nav-link" href="/#/">
-        <i class="fas fa-fw fa-hands-helping"></i>
-        <span>About</span>
-      </a>
-    </li>
+    <div v-else-if="isDelieveryMan">
+      <!-- Heading -->
+      <div class="sidebar-heading">Delieveryman</div>
 
-    <!-- Divider -->
-    <hr class="sidebar-divider d-none d-md-block" />
+      <!-- Nav Item - Profile -->
+      <li class="nav-item">
+        <a class="nav-link" href="/#/welcome">
+          <i class="fas fa-fw fa-user"></i>
+          <span>Profile</span>
+        </a>
+      </li>
 
-    <!-- Heading -->
-    <div class="sidebar-heading">Delieveryman</div>
-
-    <!-- Nav Item - Profile -->
-    <li class="nav-item">
-      <a class="nav-link" href="/#/">
-        <i class="fas fa-fw fa-user"></i>
-        <span>Profile</span>
-      </a>
-    </li>
-
-    <!-- Nav Item - About -->
-    <li class="nav-item">
-      <a class="nav-link" href="/#/">
-        <i class="fas fa-fw fa-hands-helping"></i>
-        <span>About</span>
-      </a>
-    </li>
-
-    <!-- Divider -->
-    <hr class="sidebar-divider d-none d-md-block" />
+      <!-- Nav Item - About -->
+      <li class="nav-item">
+        <a class="nav-link" href="/#/welcome">
+          <i class="fas fa-fw fa-hands-helping"></i>
+          <span>About</span>
+        </a>
+      </li>
+    </div>
 
     <!-- Divider -->
     <hr class="sidebar-divider d-none d-md-block" />
@@ -157,7 +154,22 @@
 </template>
 
 <script>
-export default {};
+export default {
+  computed: {
+    isNotClient() {
+      return this.$store.state.user.type != "C";
+    },
+    isManager() {
+      return this.$store.state.user.type == "EM";
+    },
+    isCooker() {
+      return this.$store.state.user.type == "EC";
+    },
+    isDelieveryMan() {
+      return this.$store.state.user.type == "ED";
+    },
+  },
+};
 </script>
 
 <style>

@@ -8,6 +8,9 @@ use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\OrderItemController;
 
+use App\Http\Controllers\Api\AuthController;
+use Illuminate\Contracts\Auth\UserProvider;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -21,6 +24,16 @@ use App\Http\Controllers\Api\OrderItemController;
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
+});
+
+Route::post('login', [AuthController::class, 'login']);
+Route::post('signup', [AuthController::class, 'signup']);
+Route::post('upload-photo', [AuthController::class, 'uploadPhoto']);
+
+//Rotas protegidas para apenas utilizadores autenticados e não bloqueados
+Route::middleware(['auth:sanctum', 'non-blocked'])->group(function () {
+    Route::get('/user/auth', [UserController::class, 'GetAuthUser']);
+    Route::post('logout', [AuthController::class, 'logout']);
 });
 
 //Rotas para todos os utilizadores

@@ -8,9 +8,13 @@ class Customer extends User
 {
     use HasFactory;
 
+    protected $fillable = [
+        'id', 'address', 'phone', 'nif',
+    ];
+
     public function user()
     {
-        return $this->hasOne('App\Models\User', 'id', 'id');
+        return $this->belongsTo('App\Models\User', 'id', 'id');
     }
 
     public function orders()

@@ -5,29 +5,8 @@
 @section('content')
 
 <!-- Page Wrapper -->
-<div id="wrapper">
 
-  <sidebar></sidebar>
-
-  <!-- Content Wrapper -->
-  <div id="content-wrapper" class="d-flex flex-column">
-
-    <!-- Main Content -->
-    <div id="content">
-
-      <topbar></topbar>
-
-      <router-view></router-view>
-
-    </div>
-    <!-- End of Main Content -->
-
-    <foot></foot>
-
-  </div>
-  <!-- End of Content Wrapper -->
-
-</div>
+<router-view></router-view>
 
 <!-- Scroll to Top Button-->
 <a class="scroll-to-top rounded" href="#page-top">

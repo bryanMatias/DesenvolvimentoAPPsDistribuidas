@@ -5,33 +5,56 @@ require('./bootstrap')
 window.Vue = require('vue')
 
 import VueRouter from 'vue-router'
+import Vuex from 'vuex'
+
 Vue.use(VueRouter)
+Vue.use(Vuex)
 
 import AppComponent from './App.vue'
-import HomeComponent from './pages/Home.vue'
+import WelcomeComponent from './pages/Welcome.vue'
+
 import DashboardComponent from './pages/Dashboard.vue'
 
 import ProductsComponent from './pages/Products.vue'
 
 import UsersComponent from './developer/Users.vue'
 
-import SideBarComponent from "./components/SideBar.vue"
-import TopBarComponent from "./components/TopBar.vue"
-import FooterComponent from "./components/Footer.vue"
+import LoginComponent from './pages/login.vue'
+import SignUpComponent from './pages/signup.vue'
 
-Vue.component('sidebar', SideBarComponent)
-Vue.component('topbar', TopBarComponent)
-Vue.component('foot', FooterComponent)
+const store = new Vuex.Store({
+    state: {
+        authenticated: false,
+        user: null,
+    },
+    mutations: {
+        signIn(state, user) {
+            state.user = user
+            state.authenticated = true
+        },
+        signOut(state) {
+            state.user = null
+            state.authenticated = false
+        },
+    },
+})
 
 const routes = [
-    {path:'/', component:HomeComponent},
-    {path:'/dashboard', component:DashboardComponent},
-    
-    {path:'/products', component:ProductsComponent},
+    {
+        path: '/', component: AppComponent,
+        children: [
+            { path: 'welcome', component: WelcomeComponent },
+            { path: 'dashboard', component: DashboardComponent },
+            { path: 'products', component: ProductsComponent },
+            { path: 'login', component: LoginComponent },
+            { path: 'signup', component: SignUpComponent },
+        ]
+    },
+    //{path:'/dashboard', component:DashboardComponent},
 
-    {path:'/dev/users', component:UsersComponent},
+    //{path:'/products', component:ProductsComponent},
 
-    {path:'/example', component:AppComponent},
+    { path: '/dev/users', component: UsersComponent },
 ]
 
 const router = new VueRouter({
@@ -40,5 +63,6 @@ const router = new VueRouter({
 
 const app = new Vue({
     el: '#app',
-    router
+    router,
+    store,
 })
