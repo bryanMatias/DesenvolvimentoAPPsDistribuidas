@@ -122,9 +122,9 @@
       </li>
     </div>
 
-    <div v-else-if="isDelieveryMan">
+    <div v-else-if="isDeliveryMan">
       <!-- Heading -->
-      <div class="sidebar-heading">Delieveryman</div>
+      <div class="sidebar-heading">DeliveryMan</div>
 
       <!-- Nav Item - Profile -->
       <li class="nav-item">
@@ -165,7 +165,7 @@ export default {
     isCooker() {
       return this.$store.state.user.type == "EC";
     },
-    isDelieveryMan() {
+    isDeliveryMan() {
       return this.$store.state.user.type == "ED";
     },
   },

@@ -1948,9 +1948,7 @@ __webpack_require__.r(__webpack_exports__);
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
-    return {
-      user: null
-    };
+    return {};
   },
   methods: {
     logout: function logout() {
@@ -1959,13 +1957,13 @@ __webpack_require__.r(__webpack_exports__);
       axios.post("/api/logout").then(function (response) {
         console.log("User has logged out");
 
-        _this.$store.commit('signOut');
+        _this.$store.commit("signOut");
 
         sessionStorage.removeItem("userAuth");
 
-        _this.$router.push('/welcome');
+        _this.$router.push("/welcome");
       })["catch"](function (error) {
-        console.log("Invalid Logout");
+        console.log("Invalid Logout"); //ainda há situações que apanha logout invalido!
       });
     }
   },
@@ -1978,6 +1976,7 @@ __webpack_require__.r(__webpack_exports__);
     if (sessionStorage.getItem("userAuth")) {
       try {
         this.$store.state.user = JSON.parse(sessionStorage.getItem("userAuth"));
+        this.$store.state.order = JSON.parse(sessionStorage.getItem("order"));
       } catch (e) {
         sessionStorage.removeItem("userAuth");
       }
@@ -1986,6 +1985,9 @@ __webpack_require__.r(__webpack_exports__);
   computed: {
     retUser: function retUser() {
       return this.$store.state.user;
+    },
+    currentOrder: function currentOrder() {
+      return this.$store.state.order;
     }
   }
 });
@@ -2221,7 +2223,7 @@ __webpack_require__.r(__webpack_exports__);
     isCooker: function isCooker() {
       return this.$store.state.user.type == "EC";
     },
-    isDelieveryMan: function isDelieveryMan() {
+    isDeliveryMan: function isDeliveryMan() {
       return this.$store.state.user.type == "ED";
     }
   }
@@ -2245,14 +2247,55 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 /* harmony default export */ __webpack_exports__["default"] = ({
-  props: ["hours", "minutes", "seconds"],
+  props: ["dateStart"],
+  data: function data() {
+    return {
+      hour: 0,
+      minute: 0,
+      second: 0,
+      t: null
+    };
+  },
   methods: {
     incrementMinutes: function incrementMinutes() {
-      this.$emit("increment-minutes");
+      if (this.minute == 59) {
+        this.minute = 0;
+        this.hour += 1;
+      } else {
+        this.minute += 1;
+      }
     },
-    incrementSecond: function incrementSecond() {
-      this.$emit("increment-seconds");
+    incrementSeconds: function incrementSeconds() {
+      if (this.second == 59) {
+        this.second = 0;
+        this.incrementMinutes();
+      } else {
+        this.second += 1;
+      }
+    },
+    padNumber: function padNumber(number, pad) {
+      var s = String(number);
+
+      while (s.length < (pad || 2)) {
+        s = "0" + s;
+      }
+
+      return s;
     }
+  },
+  mounted: function mounted() {
+    var _this = this;
+
+    var diffDate = new Date(new Date() - this.dateStart.getTime());
+    this.hour = diffDate.getHours() - 1;
+    this.minute = diffDate.getMinutes();
+    this.second = diffDate.getSeconds();
+    this.t = setInterval(function () {
+      _this.incrementSeconds();
+    }, 1000);
+  },
+  beforeDestroy: function beforeDestroy() {
+    clearInterval(this.t);
   }
 });
 
@@ -2529,7 +2572,7 @@ __webpack_require__.r(__webpack_exports__);
         return user.type == "EC";
       });
     },
-    filterDelieveryMans: function filterDelieveryMans() {
+    filterDeliveryMans: function filterDeliveryMans() {
       this.displayedUsers = this.allUsers.filter(function (user) {
         return user.type == "ED";
       });
@@ -2564,10 +2607,15 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _components_Timmer_vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../components/Timmer.vue */ "./resources/js/components/Timmer.vue");
-//
-//
-//
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _components_Timmer_vue__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../components/Timmer.vue */ "./resources/js/components/Timmer.vue");
+
+
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
 //
 //
 //
@@ -2674,73 +2722,82 @@ __webpack_require__.r(__webpack_exports__);
     return {
       customer: undefined,
       order: undefined,
+      orderItems: [],
       ordersReady: undefined,
       ordersReadyLength: 0,
-      hours: 0,
-      minutes: 0,
-      seconds: 0
+      orderTimmer: undefined
     };
   },
   methods: {
     doNothing: function doNothing() {},
     refreshTimmer: function refreshTimmer() {},
-    incrementMinutes: function incrementMinutes() {
-      if (this.minutes == 59) {
-        this.minutes = 0;
-        this.hours += 1;
-      } else {
-        this.minutes += 1;
+    loadData: function () {
+      var _loadData = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee() {
+        var _this = this;
+
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                _context.next = 2;
+                return axios.get("/api/customers/".concat(this.order.customer_id)).then(function (response) {
+                  return response.data;
+                });
+
+              case 2:
+                this.customer = _context.sent;
+                axios.get("/api/orders-ready").then(function (response) {
+                  if (response.data.data.length) {
+                    _this.ordersReady = response.data.data;
+                    _this.ordersReadyLength = response.data.data.length;
+                  }
+                });
+
+              case 4:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, _callee, this);
+      }));
+
+      function loadData() {
+        return _loadData.apply(this, arguments);
       }
-    },
-    incrementSeconds: function incrementSeconds() {
-      if (this.seconds == 59) {
-        this.seconds = 0;
-        this.incrementMinutes();
-      } else {
-        this.seconds += 1;
-      }
-    },
-    padNumber: function padNumber(number, pad) {
-      var s = String(number);
 
-      while (s.length < (pad || 2)) {
-        s = "0" + s;
-      }
-
-      return s;
-    },
-    loadData: function loadData() {
-      var _this = this;
-
-      axios.get("api/customers/74").then(function (response) {
-        _this.customer = response.data;
-      });
-      axios.get("api/orders/45").then(function (response) {
-        _this.order = response.data; //Inicializar o contador de tempo [Atenção à hora por causa do fuso horario]
-
-        var tempoAntes = new Date(2020, 10, 25, 10, 10, 0);
-        var tempoAgora = Date.now();
-        var begindate = new Date(tempoAgora - tempoAntes.getTime());
-        _this.hours = begindate.getHours();
-        _this.minutes = begindate.getMinutes();
-        _this.seconds = begindate.getSeconds();
-        window.setInterval(function () {
-          _this.incrementSeconds();
-        }, 1000);
-      });
-      axios.get("api/orders-ready").then(function (response) {
-        if (response.data.data.length) {
-          _this.ordersReady = response.data.data;
-          _this.ordersReadyLength = response.data.data.length;
-        }
-      });
-    }
+      return loadData;
+    }()
   },
   mounted: function mounted() {
-    this.loadData();
+    var _this2 = this;
+
+    return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee2() {
+      return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee2$(_context2) {
+        while (1) {
+          switch (_context2.prev = _context2.next) {
+            case 0:
+              _this2.order = _this2.$store.state.order.data;
+
+              if (!_this2.order) {
+                _context2.next = 6;
+                break;
+              }
+
+              _this2.orderTimmer = new Date(_this2.order.current_status_at);
+              _this2.orderItems = _this2.$store.state.order.orderItems;
+              _context2.next = 6;
+              return _this2.loadData();
+
+            case 6:
+            case "end":
+              return _context2.stop();
+          }
+        }
+      }, _callee2);
+    }))();
   },
   components: {
-    timmer: _components_Timmer_vue__WEBPACK_IMPORTED_MODULE_0__["default"]
+    timmer: _components_Timmer_vue__WEBPACK_IMPORTED_MODULE_1__["default"]
   }
 });
 
@@ -2831,6 +2888,16 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__);
+
+
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
+//
+//
 //
 //
 //
@@ -2878,14 +2945,46 @@ __webpack_require__.r(__webpack_exports__);
 
       axios.get("/sanctum/csrf-cookie").then(function (response) {
         axios.post("/api/login", _this.credentials).then(function (response) {
-          //console.log("User has loggeg in");
-          console.dir(response.data);
+          _this.$store.commit("signIn", response.data);
 
-          _this.$store.commit('signIn', response.data);
+          sessionStorage.setItem("userAuth", JSON.stringify(_this.$store.state.user));
+          axios.get("/api/deliverymans/".concat(response.data.id, "/order")).then( /*#__PURE__*/function () {
+            var _ref = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee(response) {
+              var newOrder;
+              return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee$(_context) {
+                while (1) {
+                  switch (_context.prev = _context.next) {
+                    case 0:
+                      newOrder = {
+                        data: response.data,
+                        orderItems: []
+                      };
+                      _context.next = 3;
+                      return axios.get("/api/orders/".concat(response.data.id, "/order-items")).then(function (response) {
+                        newOrder.orderItems = response.data;
+                      });
 
-          sessionStorage.setItem('userAuth', JSON.stringify(_this.$store.state.user));
+                    case 3:
+                      _this.$store.commit('loadOrder', newOrder);
 
-          _this.$router.push('/welcome');
+                      sessionStorage.setItem('order', JSON.stringify(_this.$store.state.order));
+
+                    case 5:
+                    case "end":
+                      return _context.stop();
+                  }
+                }
+              }, _callee);
+            }));
+
+            return function (_x) {
+              return _ref.apply(this, arguments);
+            };
+          }())["catch"](function (error) {
+            console.log("FAILED WHILE GETTING ORDER INFO!");
+          });
+
+          _this.$router.push("/welcome");
         })["catch"](function (error) {
           _this.invalidAuthMessage = error.response.data.message;
           _this.credentials.email = "";
@@ -3294,7 +3393,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "\n#failed-message{\n  color: red;\n  font-size: 20px;\n  font-weight: bold;\n}\n", ""]);
+exports.push([module.i, "\n#failed-message {\n  color: red;\n  font-size: 20px;\n  font-weight: bold;\n}\n", ""]);
 
 // exports
 
@@ -22716,10 +22815,10 @@ var render = function() {
             _vm._v(" "),
             _vm._m(10)
           ])
-        : _vm.isDelieveryMan
+        : _vm.isDeliveryMan
         ? _c("div", [
             _c("div", { staticClass: "sidebar-heading" }, [
-              _vm._v("Delieveryman")
+              _vm._v("DeliveryMan")
             ]),
             _vm._v(" "),
             _vm._m(11),
@@ -22936,16 +23035,16 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("div", [
-    _c("span", [
-      _vm._v(
-        _vm._s(_vm.hours) +
-          ":" +
-          _vm._s(_vm.minutes) +
-          ":" +
-          _vm._s(_vm.seconds)
-      )
-    ])
+  return _c("span", [
+    _vm._v(
+      "\n  " +
+        _vm._s(_vm.padNumber(_vm.hour, 2)) +
+        ":" +
+        _vm._s(_vm.padNumber(_vm.minute, 2)) +
+        ":" +
+        _vm._s(_vm.padNumber(_vm.second, 2)) +
+        "\n"
+    )
   ])
 }
 var staticRenderFns = []
@@ -23370,11 +23469,11 @@ var render = function() {
           {
             on: {
               click: function($event) {
-                return _vm.filterDelieveryMans()
+                return _vm.filterDeliveryMans()
               }
             }
           },
-          [_vm._v("DelieveryMans")]
+          [_vm._v("DeliveryMans")]
         ),
         _vm._v(" "),
         _c(
@@ -23471,103 +23570,111 @@ var render = function() {
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
   return _c("div", [
-    _c("div", { staticClass: "container ed-container" }, [
-      _c(
-        "div",
-        { staticClass: "card ed-card shadow bg-secondary mb-4" },
-        [
-          _c("h4", { staticClass: "ed-card-section" }, [_vm._v("Cliente:")]),
-          _vm._v(" "),
-          _c("div", { staticClass: "row" }, [
-            _c("div", { staticClass: "col-2" }, [_vm._v("[FOTO CLIENTE]")]),
+    _vm.order
+      ? _c("div", { staticClass: "container ed-container" }, [
+          _c("div", { staticClass: "card ed-card shadow bg-secondary mb-4" }, [
+            _c("h4", { staticClass: "ed-card-section" }, [_vm._v("Cliente:")]),
             _vm._v(" "),
-            _c("div", { staticClass: "col-10" }, [
-              _c("ul", [
-                _c("li", [_vm._v("Nome: " + _vm._s(_vm.customer.name))]),
-                _vm._v(" "),
-                _c("li", [_vm._v("Morada: " + _vm._s(_vm.customer.address))]),
-                _vm._v(" "),
-                _c("li", [_vm._v("Telefone: " + _vm._s(_vm.customer.phone))]),
-                _vm._v(" "),
-                _c("li", [_vm._v("E-mail: " + _vm._s(_vm.customer.email))])
-              ])
-            ])
-          ]),
-          _vm._v(" "),
-          _c("hr", { staticClass: "ed-divider" }),
-          _vm._v(" "),
-          _c("h4", { staticClass: "ed-card-section" }, [
-            _vm._v("Encomenda #" + _vm._s(_vm.order.id) + ":")
-          ]),
-          _vm._v(" "),
-          _c("p", [_vm._v("Items:")]),
-          _vm._v(" "),
-          _c(
-            "ul",
-            _vm._l(_vm.order.order_items, function(orderItem) {
-              return _c("li", { key: orderItem.id }, [
-                _vm._v(
-                  "\n          " +
-                    _vm._s(orderItem.id) +
-                    " - " +
-                    _vm._s(orderItem.product.name) +
-                    "\n          " +
-                    _vm._s(orderItem.quantity) +
-                    "x\n        "
-                )
-              ])
-            }),
-            0
-          ),
-          _vm._v(" "),
-          _vm.order.notes
-            ? _c("p", [_vm._v("Notas: " + _vm._s(_vm.order.notes))])
-            : _vm._e(),
-          _vm._v(" "),
-          _c("hr", { staticClass: "ed-divider" }),
-          _vm._v(" "),
-          _c("h4", { staticClass: "ed-card-section" }, [
-            _vm._v("Temporizadores:")
-          ]),
-          _vm._v(" "),
-          _c("timmer", {
-            attrs: {
-              hours: _vm.hours,
-              minutes: _vm.minutes,
-              seconds: _vm.seconds
-            },
-            on: {
-              "increment-seconds": _vm.incrementSeconds,
-              "increment-minutes": _vm.incrementMinutes
-            }
-          }),
-          _vm._v(" "),
-          _c("p", [_vm._v("Inicio: 12:00:00 12/12/2000")]),
-          _vm._v(" "),
-          _c("hr", { staticClass: "ed-divider" }),
-          _vm._v(" "),
-          _c("form", { attrs: { method: "POST" } }, [
+            _vm.customer
+              ? _c("div", { staticClass: "row" }, [
+                  _c("div", { staticClass: "col-2" }, [
+                    _vm._v("[FOTO CLIENTE]")
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "col-10" }, [
+                    _c("ul", [
+                      _c("li", [_vm._v("Nome: " + _vm._s(_vm.customer.name))]),
+                      _vm._v(" "),
+                      _c("li", [
+                        _vm._v("Morada: " + _vm._s(_vm.customer.address))
+                      ]),
+                      _vm._v(" "),
+                      _c("li", [
+                        _vm._v("Telefone: " + _vm._s(_vm.customer.phone))
+                      ]),
+                      _vm._v(" "),
+                      _c("li", [
+                        _vm._v("E-mail: " + _vm._s(_vm.customer.email))
+                      ])
+                    ])
+                  ])
+                ])
+              : _vm._e(),
+            _vm._v(" "),
+            _c("hr", { staticClass: "ed-divider" }),
+            _vm._v(" "),
+            _c("h4", { staticClass: "ed-card-section" }, [
+              _vm._v("Encomenda #" + _vm._s(_vm.order.id) + ":")
+            ]),
+            _vm._v(" "),
+            _c("p", [_vm._v("Items:")]),
+            _vm._v(" "),
             _c(
-              "button",
-              {
-                staticClass: "btn btn-primary",
-                attrs: { type: "submit" },
-                on: {
-                  click: function($event) {
-                    $event.preventDefault()
-                    return _vm.doNothing()
+              "ul",
+              _vm._l(_vm.orderItems, function(orderItem) {
+                return _c("li", { key: orderItem.id }, [
+                  _vm._v(
+                    "\n          " +
+                      _vm._s(orderItem.id) +
+                      " - " +
+                      _vm._s(orderItem.product.name) +
+                      "\n          " +
+                      _vm._s(orderItem.quantity) +
+                      "x\n        "
+                  )
+                ])
+              }),
+              0
+            ),
+            _vm._v(" "),
+            _vm.order.notes
+              ? _c("p", [_vm._v("Notas: " + _vm._s(_vm.order.notes))])
+              : _vm._e(),
+            _vm._v(" "),
+            _c("hr", { staticClass: "ed-divider" }),
+            _vm._v(" "),
+            _c("h4", { staticClass: "ed-card-section" }, [
+              _vm._v("Temporizadores:")
+            ]),
+            _vm._v(" "),
+            _vm.orderTimmer
+              ? _c(
+                  "div",
+                  [
+                    _vm._v(
+                      "\n        Tempo desde o inicio da entrega:\n        "
+                    ),
+                    _c("timmer", { attrs: { dateStart: _vm.orderTimmer } }),
+                    _vm._v(" "),
+                    _c("p", [
+                      _vm._v("Inicio: " + _vm._s(_vm.order.current_status_at))
+                    ])
+                  ],
+                  1
+                )
+              : _vm._e(),
+            _vm._v(" "),
+            _c("hr", { staticClass: "ed-divider" }),
+            _vm._v(" "),
+            _c("form", { attrs: { method: "POST" } }, [
+              _c(
+                "button",
+                {
+                  staticClass: "btn btn-primary",
+                  attrs: { type: "submit" },
+                  on: {
+                    click: function($event) {
+                      $event.preventDefault()
+                      return _vm.doNothing()
+                    }
                   }
-                }
-              },
-              [_vm._v("\n          Entregue!\n        ")]
-            )
+                },
+                [_vm._v("\n          Entregue!\n        ")]
+              )
+            ])
           ])
-        ],
-        1
-      )
-    ]),
-    _vm._v(" "),
-    _vm.ordersReadyLength
+        ])
+      : _vm.ordersReadyLength
       ? _c("div", { staticClass: "container ed-container" }, [
           _c("div", { staticClass: "card ed-card shadow bg-secondary mb-4" }, [
             _vm._m(0),
@@ -23807,7 +23914,7 @@ var render = function() {
   return _c("div", { staticClass: "jumbotron" }, [
     _vm.invalidAuthMessage
       ? _c("div", { attrs: { id: "failed-message" } }, [
-          _vm._v(_vm._s(_vm.invalidAuthMessage))
+          _vm._v("\n    " + _vm._s(_vm.invalidAuthMessage) + "\n  ")
         ])
       : _vm._e(),
     _vm._v(" "),
@@ -40842,7 +40949,12 @@ Vue.use(vuex__WEBPACK_IMPORTED_MODULE_1__["default"]);
 var store = new vuex__WEBPACK_IMPORTED_MODULE_1__["default"].Store({
   state: {
     authenticated: false,
-    user: null
+    user: null,
+    order: {
+      //Para um cliente isto é o carrinho de compras, para um empregado, é a encomenda que estão a tratar atualmente. NOTA: O anonimo também tem carrinho de compras, mas só pode enviar o pedido se estiver autenticado!
+      data: null,
+      orderItems: []
+    }
   },
   mutations: {
     signIn: function signIn(state, user) {
@@ -40852,6 +40964,12 @@ var store = new vuex__WEBPACK_IMPORTED_MODULE_1__["default"].Store({
     signOut: function signOut(state) {
       state.user = null;
       state.authenticated = false;
+    },
+    loadOrder: function loadOrder(state, _ref) {
+      var data = _ref.data,
+          orderItems = _ref.orderItems;
+      Vue.set(state.order, 'data', data);
+      Vue.set(state.order, 'orderItems', orderItems);
     }
   }
 });
@@ -40874,9 +40992,7 @@ var routes = [{
     path: 'signup',
     component: _pages_signup_vue__WEBPACK_IMPORTED_MODULE_8__["default"]
   }]
-}, //{path:'/dashboard', component:DashboardComponent},
-//{path:'/products', component:ProductsComponent},
-{
+}, {
   path: '/dev/users',
   component: _developer_Users_vue__WEBPACK_IMPORTED_MODULE_6__["default"]
 }];

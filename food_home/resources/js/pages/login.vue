@@ -1,6 +1,8 @@
 <template>
   <div class="jumbotron">
-    <div id="failed-message" v-if="invalidAuthMessage">{{ invalidAuthMessage }}</div>
+    <div id="failed-message" v-if="invalidAuthMessage">
+      {{ invalidAuthMessage }}
+    </div>
     <h2>Login</h2>
     <div class="form-group">
       <label for="inputEmail">Email</label>
@@ -46,11 +48,30 @@ export default {
         axios
           .post("/api/login", this.credentials)
           .then((response) => {
-            //console.log("User has loggeg in");
-            console.dir(response.data);
-            this.$store.commit('signIn', response.data);
-            sessionStorage.setItem('userAuth', JSON.stringify(this.$store.state.user));
-            this.$router.push('/welcome');
+            this.$store.commit("signIn", response.data);
+            sessionStorage.setItem(
+              "userAuth",
+              JSON.stringify(this.$store.state.user)
+            );
+            axios
+              .get(`/api/deliverymans/${response.data.id}/order`)
+              .then(async (response) => {
+                var newOrder = {
+                  data: response.data,
+                  orderItems: [],
+                };
+                await axios
+                  .get(`/api/orders/${response.data.id}/order-items`)
+                  .then((response) => {
+                    newOrder.orderItems = response.data;
+                  });
+                this.$store.commit('loadOrder', newOrder);
+                sessionStorage.setItem('order', JSON.stringify(this.$store.state.order));
+              })
+              .catch((error) => {
+                console.log("FAILED WHILE GETTING ORDER INFO!");
+              });
+            this.$router.push("/welcome");
           })
           .catch((error) => {
             this.invalidAuthMessage = error.response.data.message;
@@ -64,7 +85,7 @@ export default {
 </script>
 
 <style>
-#failed-message{
+#failed-message {
   color: red;
   font-size: 20px;
   font-weight: bold;

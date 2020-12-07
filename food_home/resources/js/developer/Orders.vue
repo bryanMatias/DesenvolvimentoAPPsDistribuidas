@@ -10,7 +10,7 @@
         <button v-on:click="showAllUsers()">All</button>
         <button v-on:click="filterCustomers()">Clients</button>
         <button v-on:click="filterCookers()">Cookers</button>
-        <button v-on:click="filterDelieveryMans()">DelieveryMans</button>
+        <button v-on:click="filterDeliveryMans()">DeliveryMans</button>
         <button v-on:click="filterManagers()">Managers</button>
       </div>
       <div class="card-body">
@@ -70,7 +70,7 @@ export default {
         return user.type == "EC";
       });
     },
-    filterDelieveryMans: function () {
+    filterDeliveryMans: function () {
       this.displayedUsers = this.allUsers.filter((user) => {
         return user.type == "ED";
       });

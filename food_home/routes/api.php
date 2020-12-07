@@ -34,6 +34,12 @@ Route::post('upload-photo', [AuthController::class, 'uploadPhoto']);
 Route::middleware(['auth:sanctum', 'non-blocked'])->group(function () {
     Route::get('/user/auth', [UserController::class, 'GetAuthUser']);
     Route::post('logout', [AuthController::class, 'logout']);
+
+    //Rotas para DeliveryMans...
+    Route::middleware(['isDeliveryMan'])->group(function () {
+        Route::get('/deliverymans/{user}/order', [OrderController::class, 'getDeliveryManCurrentOrder']);
+    });
+
 });
 
 //Rotas para todos os utilizadores
@@ -45,7 +51,7 @@ Route::get('/customers', [UserController::class, 'GetAllCustomers']);
 Route::get('/customers/{customer}', [UserController::class, 'GetCustomerById']);
 
 //Rotas para o homens de entrega
-Route::get('/delieverymans', [UserController::class, 'GetAllDelieveryMans']);
+Route::get('/deliverymans', [UserController::class, 'GetAllDeliveryMans']);
 
 //Rotas para os produtos
 Route::get('/products', [ProductController::class, 'get']);
@@ -59,6 +65,9 @@ Route::get('/orders/{order}/order-items', [OrderController::class, 'getOrderItem
 //Rotas para as encomendas prontas para entrega
 Route::get('/orders-ready', [OrderController::class, 'getOrdersReady']);
 Route::put('/orders-ready/{order}', [OrderController::class, 'putOrderTransit']);
+
+//Rotas para as encomendas a serem entregues
+Route::get('/orders-transit', [OrderController::class, 'getOrdersTransit']);
 
 //Rotas para os items de cada encomenda
 Route::get('/order-items', [OrderItemController::class, 'get']);

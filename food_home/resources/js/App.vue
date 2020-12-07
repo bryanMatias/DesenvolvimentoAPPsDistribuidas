@@ -25,7 +25,7 @@ import FooterComponent from "./components/Footer.vue";
 
 export default {
   data: function () {
-    return { user: null };
+    return {};
   },
   methods: {
     logout() {
@@ -33,12 +33,12 @@ export default {
         .post("/api/logout")
         .then((response) => {
           console.log("User has logged out");
-          this.$store.commit('signOut');
+          this.$store.commit("signOut");
           sessionStorage.removeItem("userAuth");
-          this.$router.push('/welcome');
+          this.$router.push("/welcome");
         })
         .catch((error) => {
-          console.log("Invalid Logout");
+          console.log("Invalid Logout"); //ainda há situações que apanha logout invalido!
         });
     },
   },
@@ -51,6 +51,7 @@ export default {
     if (sessionStorage.getItem("userAuth")) {
       try {
         this.$store.state.user = JSON.parse(sessionStorage.getItem("userAuth"));
+        this.$store.state.order = JSON.parse(sessionStorage.getItem("order"));
       } catch (e) {
         sessionStorage.removeItem("userAuth");
       }
@@ -59,6 +60,9 @@ export default {
   computed: {
     retUser() {
       return this.$store.state.user;
+    },
+    currentOrder(){
+      return this.$store.state.order;
     },
   },
 };

@@ -44,7 +44,7 @@ class UserController extends Controller
         return $customer;
     }
 
-    public function GetAllDelieveryMans()
+    public function GetAllDeliveryMans()
     {
         return User::where('type', 'ED')->get();
     }

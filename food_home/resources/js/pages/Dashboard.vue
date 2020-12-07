@@ -1,9 +1,9 @@
 <template>
   <div>
-    <div class="container ed-container">
+    <div class="container ed-container" v-if="order">
       <div class="card ed-card shadow bg-secondary mb-4">
         <h4 class="ed-card-section">Cliente:</h4>
-        <div class="row">
+        <div class="row" v-if="customer">
           <div class="col-2">[FOTO CLIENTE]</div>
           <div class="col-10">
             <ul>
@@ -18,7 +18,7 @@
         <h4 class="ed-card-section">Encomenda #{{ order.id }}:</h4>
         <p>Items:</p>
         <ul>
-          <li v-for="orderItem in order.order_items" v-bind:key="orderItem.id">
+          <li v-for="orderItem in orderItems" v-bind:key="orderItem.id">
             {{ orderItem.id }} - {{ orderItem.product.name }}
             {{ orderItem.quantity }}x
           </li>
@@ -26,14 +26,11 @@
         <p v-if="order.notes">Notas: {{ order.notes }}</p>
         <hr class="ed-divider" />
         <h4 class="ed-card-section">Temporizadores:</h4>
-        <timmer
-          :hours="hours"
-          :minutes="minutes"
-          :seconds="seconds"
-          @increment-seconds="incrementSeconds"
-          @increment-minutes="incrementMinutes"
-        ></timmer>
-        <p>Inicio: 12:00:00 12/12/2000</p>
+        <div v-if="orderTimmer">
+          Tempo desde o inicio da entrega:
+          <timmer :dateStart="orderTimmer"></timmer>
+          <p>Inicio: {{ order.current_status_at }}</p>
+        </div>
         <hr class="ed-divider" />
         <form method="POST">
           <button
@@ -47,7 +44,7 @@
       </div>
     </div>
 
-    <div class="container ed-container" v-if="ordersReadyLength">
+    <div class="container ed-container" v-else-if="ordersReadyLength">
       <div class="card ed-card shadow bg-secondary mb-4">
         <div class="card-header bg-secondary">
           <h4 class="ed-card-section">Encomendas prontas para entrega:</h4>
@@ -109,58 +106,22 @@ export default {
     return {
       customer: undefined,
       order: undefined,
+      orderItems: [],
       ordersReady: undefined,
       ordersReadyLength: 0,
-      hours: 0,
-      minutes: 0,
-      seconds: 0,
+      orderTimmer: undefined,
     };
   },
   methods: {
     doNothing: function () {},
     refreshTimmer: function () {},
-    incrementMinutes: function () {
-      if (this.minutes == 59) {
-        this.minutes = 0;
-        this.hours += 1;
-      } else {
-        this.minutes += 1;
-      }
-    },
-    incrementSeconds: function () {
-      if (this.seconds == 59) {
-        this.seconds = 0;
-        this.incrementMinutes();
-      } else {
-        this.seconds += 1;
-      }
-    },
-    padNumber: function (number, pad) {
-      var s = String(number);
-      while (s.length < (pad || 2)) {
-        s = "0" + s;
-      }
-      return s;
-    },
-    loadData: function () {
-      axios.get("api/customers/74").then((response) => {
-        this.customer = response.data;
-      });
-      axios.get("api/orders/45").then((response) => {
-        this.order = response.data;
-
-        //Inicializar o contador de tempo [Atenção à hora por causa do fuso horario]
-        var tempoAntes = new Date(2020, 10, 25, 10, 10, 0);
-        var tempoAgora = Date.now();
-        var begindate = new Date(tempoAgora - tempoAntes.getTime());
-        this.hours = begindate.getHours();
-        this.minutes = begindate.getMinutes();
-        this.seconds = begindate.getSeconds();
-        window.setInterval(() => {
-          this.incrementSeconds();
-        }, 1000);
-      });
-      axios.get("api/orders-ready").then((response) => {
+    loadData: async function () {
+      this.customer = await axios
+        .get(`/api/customers/${this.order.customer_id}`)
+        .then((response) => {
+          return response.data;
+        });
+      axios.get("/api/orders-ready").then((response) => {
         if (response.data.data.length) {
           this.ordersReady = response.data.data;
           this.ordersReadyLength = response.data.data.length;
@@ -168,8 +129,13 @@ export default {
       });
     },
   },
-  mounted() {
-    this.loadData();
+  async mounted() {
+    this.order = this.$store.state.order.data;
+    if (this.order) {
+      this.orderTimmer = new Date(this.order.current_status_at);
+      this.orderItems = this.$store.state.order.orderItems;
+      await this.loadData();
+    }
   },
   components: {
     timmer: TimmerComponent,

@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Models\User;
 
 use App\Http\Resources\OrderItem as OrderItemResource;
 
@@ -31,7 +32,11 @@ class OrderController extends Controller
 
     public function getOrderItemsFromOrder(Order $order)
     {
-        //return OrderItemResource::collection($order->orderItems);
+
+        foreach ($order->orderItems as $orderItem) {
+            $orderItem->product;
+        }
+
         return $order->orderItems;
     }
 
@@ -53,12 +58,35 @@ class OrderController extends Controller
 
     public function putOrderTransit(Order $order)
     {
-        //validar se a encomenda é de facto valida para se atualizar...
+        //validar se a encomenda é de facto valida para se atualizar... tem que ser feita por um deliveryMan autenticado!
 
         $updateTime = now();
         $order->status = 'T';
         $order->current_status_at = $updateTime;
         $order->updated_at = $updateTime;
+        //atualizar o id do deliveryMan!!
         $order->save();
+    }
+
+    ///////////////////////////////////////////////
+    /* FUNÇÕES PARA ORDERS NO ESTADO TRANSIT 'T' */
+    ///////////////////////////////////////////////
+
+    public function getOrdersTransit()
+    {
+        $orders = Order::where('status', 'T')->get();
+
+        foreach ($orders as $order) {
+            $order->customer;
+        }
+
+        return $orders;
+    }
+
+    public function getDeliveryManCurrentOrder(User $user)
+    {
+        return Order::where('status', 'T')
+            ->where('delivered_by', $user->id)
+            ->firstOrFail();
     }
 }
