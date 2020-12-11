@@ -53,24 +53,6 @@ export default {
               "userAuth",
               JSON.stringify(this.$store.state.user)
             );
-            axios
-              .get(`/api/deliverymans/${response.data.id}/order`)
-              .then(async (response) => {
-                var newOrder = {
-                  data: response.data,
-                  orderItems: [],
-                };
-                await axios
-                  .get(`/api/orders/${response.data.id}/order-items`)
-                  .then((response) => {
-                    newOrder.orderItems = response.data;
-                  });
-                this.$store.commit('loadOrder', newOrder);
-                sessionStorage.setItem('order', JSON.stringify(this.$store.state.order));
-              })
-              .catch((error) => {
-                console.log("FAILED WHILE GETTING ORDER INFO!");
-              });
             this.$router.push("/welcome");
           })
           .catch((error) => {

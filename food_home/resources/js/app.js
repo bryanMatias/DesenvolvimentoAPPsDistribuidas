@@ -26,24 +26,16 @@ const store = new Vuex.Store({
     state: {
         authenticated: false,
         user: null,
-        order: { //Para um cliente isto é o carrinho de compras, para um empregado, é a encomenda que estão a tratar atualmente. NOTA: O anonimo também tem carrinho de compras, mas só pode enviar o pedido se estiver autenticado!
-            data: null,
-            orderItems: [],
-        },
     },
     mutations: {
         signIn(state, user) {
-            state.user = user
-            state.authenticated = true
+            state.user = user;
+            state.authenticated = true;
         },
         signOut(state) {
-            state.user = null
-            state.authenticated = false
+            state.user = null;
+            state.authenticated = false;
         },
-        loadOrder(state, {data, orderItems}){
-            Vue.set(state.order, 'data', data);
-            Vue.set(state.order, 'orderItems', orderItems);
-        }
     },
 })
 

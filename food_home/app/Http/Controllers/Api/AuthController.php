@@ -40,12 +40,11 @@ class AuthController extends Controller
         ], [
             'photo.required' => 'Não foi recebida uma foto',
             'photo.mimes' => 'A foto tem que vir no format .jpg',
-            'photo.max' => 'O tamanha não pode ser superior a 2048??',
+            'photo.max' => 'O tamanho não pode ser superior a 2048??',
         ]);
 
         $path = $request->photo->store('public/fotos');
         return basename($path);
-
     }
 
     public function signup(Request $request)

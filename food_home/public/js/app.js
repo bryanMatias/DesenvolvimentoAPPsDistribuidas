@@ -1960,6 +1960,7 @@ __webpack_require__.r(__webpack_exports__);
         _this.$store.commit("signOut");
 
         sessionStorage.removeItem("userAuth");
+        sessionStorage.removeItem("order");
 
         _this.$router.push("/welcome");
       })["catch"](function (error) {
@@ -2286,7 +2287,8 @@ __webpack_require__.r(__webpack_exports__);
   mounted: function mounted() {
     var _this = this;
 
-    var diffDate = new Date(new Date() - this.dateStart.getTime());
+    var now = new Date();
+    var diffDate = new Date(now.getTime() - this.dateStart.getTime());
     this.hour = diffDate.getHours() - 1;
     this.minute = diffDate.getMinutes();
     this.second = diffDate.getSeconds();
@@ -2725,76 +2727,98 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       orderItems: [],
       ordersReady: undefined,
       ordersReadyLength: 0,
-      orderTimmer: undefined
+      orderTimmer: undefined,
+      deliveryMan: JSON.parse(sessionStorage.getItem("userAuth"))
     };
   },
   methods: {
-    doNothing: function doNothing() {},
+    doNothing: function doNothing() {
+      console.log("Nothing happened!");
+    },
     refreshTimmer: function refreshTimmer() {},
-    loadData: function () {
-      var _loadData = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee() {
-        var _this = this;
+    deliverOrder: function deliverOrder() {
+      var _this = this;
 
-        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee$(_context) {
-          while (1) {
-            switch (_context.prev = _context.next) {
-              case 0:
-                _context.next = 2;
-                return axios.get("/api/customers/".concat(this.order.customer_id)).then(function (response) {
-                  return response.data;
-                });
+      axios.put("/api/orders/".concat(this.order.id, "/deliver"), {
+        deliverStart: this.orderTimmer
+      }).then(function (response) {
+        console.log("Encomenda entregue!");
+        console.log(response.data);
+        _this.order = undefined;
+        _this.customer = undefined;
+        _this.orderItems = [];
 
-              case 2:
-                this.customer = _context.sent;
-                axios.get("/api/orders-ready").then(function (response) {
-                  if (response.data.data.length) {
-                    _this.ordersReady = response.data.data;
-                    _this.ordersReadyLength = response.data.data.length;
-                  }
-                });
+        _this.requestOrdersReady();
+      })["catch"](function (error) {
+        console.log("Nao foi possivel entregar a encomenda!");
+        console.log(error.response.data);
+      });
+    },
+    requestAssignedOrder: function requestAssignedOrder() {
+      var _this2 = this;
 
-              case 4:
-              case "end":
-                return _context.stop();
+      axios.get("/api/deliverymans/".concat(this.deliveryMan.id, "/order")).then( /*#__PURE__*/function () {
+        var _ref = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee(response) {
+          return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee$(_context) {
+            while (1) {
+              switch (_context.prev = _context.next) {
+                case 0:
+                  _this2.order = response.data;
+                  _context.next = 3;
+                  return axios.get("/api/orders/".concat(response.data.id, "/order-items")).then(function (response) {
+                    _this2.orderItems = response.data;
+                  });
+
+                case 3:
+                  _context.next = 5;
+                  return axios.get("/api/customers/".concat(_this2.order.customer_id)).then(function (response) {
+                    _this2.customer = response.data;
+                  });
+
+                case 5:
+                  _this2.orderTimmer = new Date(_this2.order.current_status_at);
+
+                case 6:
+                case "end":
+                  return _context.stop();
+              }
             }
-          }
-        }, _callee, this);
-      }));
+          }, _callee);
+        }));
 
-      function loadData() {
-        return _loadData.apply(this, arguments);
-      }
+        return function (_x) {
+          return _ref.apply(this, arguments);
+        };
+      }())["catch"](function (error) {
+        console.log("Might not have any orders assigned!");
+      });
+    },
+    requestNextOrder: function requestNextOrder() {
+      var _this3 = this;
 
-      return loadData;
-    }()
+      axios.put("/api/orders-ready/next", {
+        delviveryman_id: this.deliveryMan.id
+      }).then(function (response) {
+        console.log("Requested order to deliver!");
+        console.log(response.data);
+
+        _this3.requestAssignedOrder();
+      })["catch"](function (error) {
+        console.log("There is no order to deliver yet!");
+      });
+    },
+    requestOrdersReady: function requestOrdersReady() {
+      var _this4 = this;
+
+      axios.get("/api/orders-ready").then(function (response) {
+        _this4.ordersReady = response.data.data;
+        _this4.ordersReadyLength = response.data.data.length;
+      });
+    }
   },
   mounted: function mounted() {
-    var _this2 = this;
-
-    return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee2() {
-      return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee2$(_context2) {
-        while (1) {
-          switch (_context2.prev = _context2.next) {
-            case 0:
-              _this2.order = _this2.$store.state.order.data;
-
-              if (!_this2.order) {
-                _context2.next = 6;
-                break;
-              }
-
-              _this2.orderTimmer = new Date(_this2.order.current_status_at);
-              _this2.orderItems = _this2.$store.state.order.orderItems;
-              _context2.next = 6;
-              return _this2.loadData();
-
-            case 6:
-            case "end":
-              return _context2.stop();
-          }
-        }
-      }, _callee2);
-    }))();
+    this.requestAssignedOrder();
+    this.requestOrdersReady();
   },
   components: {
     timmer: _components_Timmer_vue__WEBPACK_IMPORTED_MODULE_1__["default"]
@@ -2888,14 +2912,6 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
-/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__);
-
-
-function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
-
-function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
-
 //
 //
 //
@@ -2948,41 +2964,6 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
           _this.$store.commit("signIn", response.data);
 
           sessionStorage.setItem("userAuth", JSON.stringify(_this.$store.state.user));
-          axios.get("/api/deliverymans/".concat(response.data.id, "/order")).then( /*#__PURE__*/function () {
-            var _ref = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee(response) {
-              var newOrder;
-              return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee$(_context) {
-                while (1) {
-                  switch (_context.prev = _context.next) {
-                    case 0:
-                      newOrder = {
-                        data: response.data,
-                        orderItems: []
-                      };
-                      _context.next = 3;
-                      return axios.get("/api/orders/".concat(response.data.id, "/order-items")).then(function (response) {
-                        newOrder.orderItems = response.data;
-                      });
-
-                    case 3:
-                      _this.$store.commit('loadOrder', newOrder);
-
-                      sessionStorage.setItem('order', JSON.stringify(_this.$store.state.order));
-
-                    case 5:
-                    case "end":
-                      return _context.stop();
-                  }
-                }
-              }, _callee);
-            }));
-
-            return function (_x) {
-              return _ref.apply(this, arguments);
-            };
-          }())["catch"](function (error) {
-            console.log("FAILED WHILE GETTING ORDER INFO!");
-          });
 
           _this.$router.push("/welcome");
         })["catch"](function (error) {
@@ -23665,11 +23646,11 @@ var render = function() {
                   on: {
                     click: function($event) {
                       $event.preventDefault()
-                      return _vm.doNothing()
+                      return _vm.deliverOrder()
                     }
                   }
                 },
-                [_vm._v("\n          Entregue!\n        ")]
+                [_vm._v("\n          Finalizar entregua!\n        ")]
               )
             ])
           ])
@@ -23723,7 +23704,7 @@ var render = function() {
                               on: {
                                 click: function($event) {
                                   $event.preventDefault()
-                                  return _vm.doNothing()
+                                  return _vm.requestNextOrder()
                                 }
                               }
                             },
@@ -23739,29 +23720,27 @@ var render = function() {
                   ])
                 ]),
                 _vm._v(" "),
-                _vm._l(_vm.ordersReadyLength - 2, function(i) {
+                _vm._l(_vm.ordersReadyLength - 1, function(i) {
                   return _c(
                     "li",
                     { key: i, staticClass: "list-group-item bg-secondary" },
                     [
                       _c("ul", [
                         _c("li", [
-                          _vm._v(
-                            "Encomenda #" + _vm._s(_vm.ordersReady[i + 1].id)
-                          )
+                          _vm._v("Encomenda #" + _vm._s(_vm.ordersReady[i].id))
                         ]),
                         _vm._v(" "),
                         _c("li", [
                           _vm._v(
                             "Cliente: " +
-                              _vm._s(_vm.ordersReady[i + 1].customer.name)
+                              _vm._s(_vm.ordersReady[i].customer.name)
                           )
                         ]),
                         _vm._v(" "),
                         _c("li", [
                           _vm._v(
                             "Pronta às " +
-                              _vm._s(_vm.ordersReady[i + 1].current_status_at)
+                              _vm._s(_vm.ordersReady[i].current_status_at)
                           )
                         ])
                       ])
@@ -40949,12 +40928,7 @@ Vue.use(vuex__WEBPACK_IMPORTED_MODULE_1__["default"]);
 var store = new vuex__WEBPACK_IMPORTED_MODULE_1__["default"].Store({
   state: {
     authenticated: false,
-    user: null,
-    order: {
-      //Para um cliente isto é o carrinho de compras, para um empregado, é a encomenda que estão a tratar atualmente. NOTA: O anonimo também tem carrinho de compras, mas só pode enviar o pedido se estiver autenticado!
-      data: null,
-      orderItems: []
-    }
+    user: null
   },
   mutations: {
     signIn: function signIn(state, user) {
@@ -40964,12 +40938,6 @@ var store = new vuex__WEBPACK_IMPORTED_MODULE_1__["default"].Store({
     signOut: function signOut(state) {
       state.user = null;
       state.authenticated = false;
-    },
-    loadOrder: function loadOrder(state, _ref) {
-      var data = _ref.data,
-          orderItems = _ref.orderItems;
-      Vue.set(state.order, 'data', data);
-      Vue.set(state.order, 'orderItems', orderItems);
     }
   }
 });

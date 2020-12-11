@@ -19,4 +19,9 @@ class Order extends Model
 		return $this->belongsTo('App\Models\Customer', 'customer_id', 'id');
 	}
 
+	public function deliveryMan()
+	{
+		return $this->belongsTo('App\Models\DeliveryMan', 'delivered_by', 'id');
+	}
+
 }

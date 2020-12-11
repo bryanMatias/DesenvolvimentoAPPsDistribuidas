@@ -38,6 +38,8 @@ Route::middleware(['auth:sanctum', 'non-blocked'])->group(function () {
     //Rotas para DeliveryMans...
     Route::middleware(['isDeliveryMan'])->group(function () {
         Route::get('/deliverymans/{user}/order', [OrderController::class, 'getDeliveryManCurrentOrder']);
+        Route::put('/orders/{order}/deliver', [OrderController::class, 'putOrderTransitToDelivered']);
+        Route::put('/orders-ready/next', [OrderController::class, 'assignNextOrderReady']);
     });
 
 });
@@ -64,7 +66,7 @@ Route::get('/orders/{order}/order-items', [OrderController::class, 'getOrderItem
 
 //Rotas para as encomendas prontas para entrega
 Route::get('/orders-ready', [OrderController::class, 'getOrdersReady']);
-Route::put('/orders-ready/{order}', [OrderController::class, 'putOrderTransit']);
+Route::put('/orders-ready/{order}', [OrderController::class, 'putOrderReadyToTransit']);
 
 //Rotas para as encomendas a serem entregues
 Route::get('/orders-transit', [OrderController::class, 'getOrdersTransit']);

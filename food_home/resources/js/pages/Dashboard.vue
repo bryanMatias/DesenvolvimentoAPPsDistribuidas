@@ -36,9 +36,9 @@
           <button
             type="submit"
             class="btn btn-primary"
-            v-on:click.prevent="doNothing()"
+            v-on:click.prevent="deliverOrder()"
           >
-            Entregue!
+            Finalizar entregua!
           </button>
         </form>
       </div>
@@ -64,7 +64,7 @@
                   <button
                     type="submit"
                     class="btn btn-primary"
-                    v-on:click.prevent="doNothing()"
+                    v-on:click.prevent="requestNextOrder()"
                   >
                     Entregar!
                   </button>
@@ -74,13 +74,13 @@
           </li>
           <li
             class="list-group-item bg-secondary"
-            v-for="i in ordersReadyLength - 2"
+            v-for="i in ordersReadyLength - 1"
             v-bind:key="i"
           >
             <ul>
-              <li>Encomenda #{{ ordersReady[i + 1].id }}</li>
-              <li>Cliente: {{ ordersReady[i + 1].customer.name }}</li>
-              <li>Pronta às {{ ordersReady[i + 1].current_status_at }}</li>
+              <li>Encomenda #{{ ordersReady[i].id }}</li>
+              <li>Cliente: {{ ordersReady[i].customer.name }}</li>
+              <li>Pronta às {{ ordersReady[i].current_status_at }}</li>
             </ul>
           </li>
         </ul>
@@ -110,32 +110,72 @@ export default {
       ordersReady: undefined,
       ordersReadyLength: 0,
       orderTimmer: undefined,
+      deliveryMan: JSON.parse(sessionStorage.getItem("userAuth")),
     };
   },
   methods: {
-    doNothing: function () {},
+    doNothing: function () {
+      console.log("Nothing happened!");
+    },
     refreshTimmer: function () {},
-    loadData: async function () {
-      this.customer = await axios
-        .get(`/api/customers/${this.order.customer_id}`)
+    deliverOrder: function () {
+      axios
+        .put(`/api/orders/${this.order.id}/deliver`, {deliverStart : this.orderTimmer})
         .then((response) => {
-          return response.data;
+          console.log("Encomenda entregue!");
+          console.log(response.data);
+          this.order = undefined;
+          this.customer = undefined;
+          this.orderItems = [];
+          this.requestOrdersReady();
+        })
+        .catch((error) => {
+          console.log("Nao foi possivel entregar a encomenda!");
+          console.log(error.response.data);
         });
+    },
+    requestAssignedOrder: function(){
+      axios
+        .get(`/api/deliverymans/${this.deliveryMan.id}/order`)
+        .then(async (response) => {
+          this.order = response.data;
+          await axios
+            .get(`/api/orders/${response.data.id}/order-items`)
+            .then((response) => {
+              this.orderItems = response.data;
+            });
+          await axios
+            .get(`/api/customers/${this.order.customer_id}`)
+            .then((response) => {
+              this.customer = response.data;
+            });
+          this.orderTimmer = new Date(this.order.current_status_at);
+        })
+        .catch((error) => {
+          console.log("Might not have any orders assigned!");
+        });
+    },
+    requestNextOrder: function() {
+      axios.put("/api/orders-ready/next", {delviveryman_id: this.deliveryMan.id})
+        .then((response) => {
+          console.log("Requested order to deliver!");
+          console.log(response.data);
+          this.requestAssignedOrder();
+        })
+        .catch((error) => {
+          console.log("There is no order to deliver yet!");
+        });
+    },
+    requestOrdersReady: function () {
       axios.get("/api/orders-ready").then((response) => {
-        if (response.data.data.length) {
-          this.ordersReady = response.data.data;
-          this.ordersReadyLength = response.data.data.length;
-        }
+        this.ordersReady = response.data.data;
+        this.ordersReadyLength = response.data.data.length;
       });
     },
   },
-  async mounted() {
-    this.order = this.$store.state.order.data;
-    if (this.order) {
-      this.orderTimmer = new Date(this.order.current_status_at);
-      this.orderItems = this.$store.state.order.orderItems;
-      await this.loadData();
-    }
+  mounted() {
+    this.requestAssignedOrder();
+    this.requestOrdersReady();
   },
   components: {
     timmer: TimmerComponent,

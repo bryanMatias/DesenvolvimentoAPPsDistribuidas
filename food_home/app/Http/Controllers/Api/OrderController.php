@@ -7,8 +7,10 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\User;
+use Carbon\Carbon;
 
 use App\Http\Resources\OrderItem as OrderItemResource;
+use App\Models\DeliveryMan;
 
 class OrderController extends Controller
 {
@@ -47,8 +49,8 @@ class OrderController extends Controller
     public function getOrdersReady()
     {
         $orders = Order::where('status', 'R')
-            ->orderBy('current_status_at', 'desc')
-            ->paginate(8);
+                    ->orderBy('current_status_at', 'DESC')
+                    ->paginate(8);
 
         foreach ($orders as $order) {
             $order->customer;
@@ -56,7 +58,23 @@ class OrderController extends Controller
         return $orders;
     }
 
-    public function putOrderTransit(Order $order)
+    public function assignNextOrderReady(Request $request)
+    {
+        $order = Order::where('status', 'R')
+        ->orderBy('current_status_at','DESC')
+        ->first();
+
+        $updateTime = now();
+        $order->status = 'T';
+        $order->current_status_at = $updateTime;
+        $order->updated_at = $updateTime;
+        $order->delivered_by = $request->delviveryman_id; //GARANTIR AUTENTICIDADE DESTE ID. Eu podia mandar ID de outro DelviveryMan, como sei que este ID é válido?
+        $order->save();
+        
+        return $order;
+    }
+
+    public function putOrderReadyToTransit(Order $order)
     {
         //validar se a encomenda é de facto valida para se atualizar... tem que ser feita por um deliveryMan autenticado!
 
@@ -64,7 +82,8 @@ class OrderController extends Controller
         $order->status = 'T';
         $order->current_status_at = $updateTime;
         $order->updated_at = $updateTime;
-        //atualizar o id do deliveryMan!!
+        //falta total_time
+        //atualizar o delivered_by do deliveryMan!!
         $order->save();
     }
 
@@ -88,5 +107,32 @@ class OrderController extends Controller
         return Order::where('status', 'T')
             ->where('delivered_by', $user->id)
             ->firstOrFail();
+    }
+
+    public function putOrderTransitToDelivered(Request $request, Order $order)
+    {
+        //validar se a encomenda é de facto valida para se atualizar... tem que ser feita por um deliveryMan autenticado!
+
+        $updateTime = now();
+
+        $startDel = Carbon::parse($request->deliverStart);
+        $deliverDuration = $updateTime->diffInSeconds($startDel);
+
+        $orderCreatedAt = Carbon::parse($order->created_at);
+        $totalDuration = $updateTime->diffInSeconds($orderCreatedAt);
+        
+        $order->status = 'D';
+        $order->current_status_at = $updateTime;
+        $order->updated_at = $updateTime;
+        $order->delivery_time = $deliverDuration;
+        $order->total_time += $totalDuration;
+        $order->closed_at = $updateTime;
+        $order->save();
+
+        return response()->json(
+            ['message' => 'Entrega bem sucedida.'],
+            200
+        );
+
     }
 }

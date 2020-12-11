@@ -35,6 +35,7 @@ export default {
           console.log("User has logged out");
           this.$store.commit("signOut");
           sessionStorage.removeItem("userAuth");
+          sessionStorage.removeItem("order");
           this.$router.push("/welcome");
         })
         .catch((error) => {

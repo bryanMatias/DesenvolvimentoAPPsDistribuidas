@@ -41,7 +41,9 @@ export default {
     },
   },
   mounted(){
-    var diffDate = new Date(new Date() - this.dateStart.getTime());
+    var now = new Date();
+    
+    var diffDate = new Date(now.getTime() - this.dateStart.getTime());
     this.hour = diffDate.getHours() - 1;
     this.minute = diffDate.getMinutes();
     this.second = diffDate.getSeconds();
