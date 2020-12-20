@@ -38,7 +38,7 @@
             class="btn btn-primary"
             v-on:click.prevent="deliverOrder()"
           >
-            Finalizar entregua!
+            Finalizar entrega!
           </button>
         </form>
       </div>
@@ -122,12 +122,14 @@ export default {
       axios
         .put(`/api/orders/${this.order.id}/deliver`, {deliverStart : this.orderTimmer})
         .then((response) => {
-          console.log("Encomenda entregue!");
-          console.log(response.data);
+          //console.log("Encomenda entregue!");
+          //console.log(response.data);
           this.order = undefined;
           this.customer = undefined;
           this.orderItems = [];
           this.requestOrdersReady();
+          this.$socket.emit('order_delivered', "HI PPL!");
+
         })
         .catch((error) => {
           console.log("Nao foi possivel entregar a encomenda!");
@@ -158,8 +160,9 @@ export default {
     requestNextOrder: function() {
       axios.put("/api/orders-ready/next", {delviveryman_id: this.deliveryMan.id})
         .then((response) => {
-          console.log("Requested order to deliver!");
-          console.log(response.data);
+          //console.log("Requested order to deliver!");
+          //console.log(response.data);
+          this.$socket.emit('order_requested', response.data);
           this.requestAssignedOrder();
         })
         .catch((error) => {
@@ -179,6 +182,16 @@ export default {
   },
   components: {
     timmer: TimmerComponent,
+  },
+  sockets: {
+    order_delivered(payload){
+      console.log(payload);
+    },
+    order_requested(payload){
+      console.log("Hey, someone requested the following order:");
+      console.log(payload);
+      this.requestOrdersReady();
+    },
   },
 };
 </script>
