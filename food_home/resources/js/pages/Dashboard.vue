@@ -4,7 +4,9 @@
       <div class="card ed-card shadow bg-secondary mb-4">
         <h4 class="ed-card-section">Cliente:</h4>
         <div class="row" v-if="customer">
-          <div class="col-2">[FOTO CLIENTE]</div>
+          <div class="col-2">
+            <img :src="'/storage/fotos/' + customer.photo_url" />
+          </div>
           <div class="col-10">
             <ul>
               <li>Nome: {{ customer.name }}</li>
