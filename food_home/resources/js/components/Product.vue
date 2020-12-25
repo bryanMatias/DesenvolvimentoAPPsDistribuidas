@@ -9,8 +9,9 @@
     <div class="card-footer">
       <ul>
         <li>Tipo: {{ product.type }}</li>
-        <!-- <li>Description: {{ product.description }}</li> -->
         <li>Preço: {{ product.price }}€</li>
+        <hr/>
+        <li>{{ product.description }}</li>
       </ul>
     </div>
   </div>

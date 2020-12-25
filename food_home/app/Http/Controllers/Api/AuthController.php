@@ -24,6 +24,15 @@ class AuthController extends Controller
                     401
                 );
             }
+
+            if($user->type === 'C'){
+                $customer_data = Customer::where('id', $user->id)->firstOrFail();
+                //return $customer_data;
+                $user->address = $customer_data->address;
+                $user->phone = $customer_data->phone;
+                $user->nif = $customer_data->nif;
+            }
+
             return $user;
         } else {
             return response()->json(
@@ -36,10 +45,10 @@ class AuthController extends Controller
     public function uploadPhoto(Request $request)
     {
         $request->validate([
-            'photo' => 'required|mimes:jpg,jpeg|max:2048'
+            'photo' => 'required|mimes:jpg,jpeg,png|max:2048'
         ], [
             'photo.required' => 'Não foi recebida uma foto',
-            'photo.mimes' => 'A foto tem que vir no format .jpg',
+            'photo.mimes' => 'A foto tem que vir no format .jpg ou .png',
             'photo.max' => 'O tamanho não pode ser superior a 2048??',
         ]);
 
@@ -51,8 +60,8 @@ class AuthController extends Controller
     {
         
         $validatedData = $request->validate([
-            'fullName' => ['required', 'regex:/^([a-zA-Z]+\ )*([a-zA-Z]+)$/i'],//mg???
-            'email' => ['required', 'unique:users,email'],
+            'fullName' => ['required', 'regex:/^([a-zA-ZàèìòùÀÈÌÒÙáéíóúýÁÉÍÓÚÝâêîôûÂÊÎÔÛãñõÃÑÕäëïöüÿÄËÏÖÜŸçÇÅå]+\ )*([a-zA-ZàèìòùÀÈÌÒÙáéíóúýÁÉÍÓÚÝâêîôûÂÊÎÔÛãñõÃÑÕäëïöüÿÄËÏÖÜŸçÇÅå]+)$/i'],//mg???
+            'email' => ['required', 'email', 'unique:users,email'],
             'address' => ['required'],
             'phone' => ['required', 'numeric'],
             'nif' => ['nullable', 'numeric', 'digits:9'],

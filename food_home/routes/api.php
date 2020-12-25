@@ -34,6 +34,7 @@ Route::post('upload-photo', [AuthController::class, 'uploadPhoto']);
 Route::middleware(['auth:sanctum', 'non-blocked'])->group(function () {
     Route::get('/user/auth', [UserController::class, 'GetAuthUser']);
     Route::post('logout', [AuthController::class, 'logout']);
+    Route::put('/user/{user}/update', [UserController::class, 'update']);
 
     //Rotas para DeliveryMans...
     Route::middleware(['isDeliveryMan'])->group(function () {

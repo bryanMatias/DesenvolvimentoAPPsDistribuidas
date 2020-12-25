@@ -30,6 +30,8 @@ import UsersComponent from './developer/Users.vue'
 import LoginComponent from './pages/login.vue'
 import SignUpComponent from './pages/signup.vue'
 
+import EditUserComponent from './pages/editUser.vue'
+
 const store = new Vuex.Store({
     state: {
         authenticated: false,
@@ -39,12 +41,16 @@ const store = new Vuex.Store({
         signIn(state, user) {
             state.user = user;
             state.authenticated = true;
+
             this._vm.$socket.emit('user_logged', state.user);
         },
         signOut(state) {
             this._vm.$socket.emit('user_logged_out', state.user);
             state.user = null;
             state.authenticated = false;
+        },
+        update(state, user){
+            state.user = user;
         },
     },
 })
@@ -58,6 +64,7 @@ const routes = [
             { path: 'products', component: ProductsComponent },
             { path: 'login', component: LoginComponent },
             { path: 'signup', component: SignUpComponent },
+            { path: 'edit-profile', component: EditUserComponent },
         ]
     },
 

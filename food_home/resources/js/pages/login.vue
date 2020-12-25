@@ -48,12 +48,16 @@ export default {
         axios
           .post("/api/login", this.credentials)
           .then((response) => {
+            
             this.$store.commit("signIn", response.data);
+
             sessionStorage.setItem(
               "userAuth",
               JSON.stringify(this.$store.state.user)
             );
+            
             this.$router.push("/welcome");
+          
           })
           .catch((error) => {
             this.invalidAuthMessage = error.response.data.message;

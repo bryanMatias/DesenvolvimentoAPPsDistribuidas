@@ -1,18 +1,18 @@
 <template>
   <div class="jumbotron">
-    <div id="failed-main-message" v-if="invalidSignMessages.mainError">
+    <div id="main-message" :class="[isError ? 'text-danger' : 'text-success']" v-if="invalidSignMessages.mainError">
       {{ invalidSignMessages.mainError }}
     </div>
-    <h2>Sign Up</h2>
+    <h2>Editar Conta</h2>
     <form enctype="multipart/form-data">
       <div class="form-group">
-        <label for="inputFullName">Nome completo</label>
+        <label for="inputName">Nome completo</label>
         <input
           type="text"
           class="form-control"
-          v-model="credentials.fullName"
-          name="fullName"
-          id="inputFullName"
+          v-model="credentials.name"
+          name="name"
+          id="inputName"
           placeholder="Nome completo"
         />
         <span
@@ -41,6 +41,7 @@
           <strong>{{ invalidSignMessages.email }}</strong>
         </span>
       </div>
+      <div v-if="isCustomer">
       <div class="form-group">
         <label for="inputAddress">Morada</label>
         <input
@@ -93,14 +94,15 @@
           <strong>{{ invalidSignMessages.nif }}</strong>
         </span>
       </div>
+      </div>
       <div class="form-group">
-        <label for="inputPassword">Password</label>
+        <label for="oldPassword">Password Atual</label>
         <input
           type="password"
           class="form-control"
-          v-model="credentials.password"
-          name="password"
-          id="inputPassword"
+          v-model="credentials.oldPassword"
+          name="oldPassword"
+          id="oldPassword"
         />
         <span
           class="failed-message"
@@ -109,7 +111,15 @@
         >
           <strong>{{ invalidSignMessages.password }}</strong>
         </span>
-        <label for="inputPassword2">Repita a password</label>
+        <label for="inputPassword1">Nova Password</label>
+        <input
+          type="password"
+          class="form-control"
+          v-model="credentials.password"
+          name="password"
+          id="inputPassword1"
+        />
+        <label for="inputPassword2">Repita a Password</label>
         <input
           type="password"
           class="form-control"
@@ -128,7 +138,7 @@
         />
       </div>
       <div class="form-group">
-        <a class="btn btn-default" v-on:click.prevent="signup">Criar conta</a>
+        <a class="btn btn-default" v-on:click.prevent="updateProfile">Atualizar</a>
       </div>
     </form>
   </div>
@@ -145,18 +155,21 @@ const STATUS_INITIAL = 0,
 export default {
   data: function () {
     return {
+      isCustomer: this.$store.state.user.type === 'C',
       credentials: {
-        fullName: "",
-        email: "",
-        address: "",
-        phone: "",
-        nif: "",
+        name: this.$store.state.user.name,
+        email: this.$store.state.user.email,
+        address: this.$store.state.user.address,
+        phone: this.$store.state.user.phone,
+        nif: this.$store.state.user.nif,
+        oldPassword: "",
         password: "",
         password_confirmation: "",
         photo_url: undefined,
       },
       photoFormData: null,
       invalidSignMessages: {
+        isError: false,
         mainError: null,
         name: null,
         email: null,
@@ -203,7 +216,6 @@ export default {
         });
     },
     fileChange(fieldName, files) {
-
       if (!files) return;
 
       var file = files[0];
@@ -211,12 +223,14 @@ export default {
       const formData = new FormData();
       formData.append(fieldName, file);
       this.photoFormData = formData;
-
     },
-    async signup() {
+    async updateProfile() {
       //Post da foto caso exista!
-      if(this.photoFormData){
-        await axios.post("/api/upload-photo", this.photoFormData, { headers: { Accept: "application/json" }, })
+      if (this.photoFormData) {
+        await axios
+          .post("/api/upload-photo", this.photoFormData, {
+            headers: { Accept: "application/json" },
+          })
           .then((response) => {
             this.credentials.photo_url = response.data;
             console.log("Url foto: " + response.data);
@@ -224,28 +238,43 @@ export default {
           .catch((error) => {
             console.log("Falhou upload da foto!");
             console.log(error.response.data);
-        });
-        
+            return;
+          });
       }
 
-      axios.post("/api/signup", this.credentials, { headers: { Accept: "application/json" }, })
+      axios
+        .put(`/api/user/${this.$store.state.user.id}/update`, this.credentials, {
+          headers: { Accept: "application/json" },
+        })
         .then((response) => {
-          //console.log("User has logged in");
           console.dir(response.data);
-          this.$router.push("/welcome");
+          //this.$router.push("/welcome");
+          this.$store.commit("update", response.data);
+          this.isError = false;
+          this.invalidSignMessages.mainError = "Atualização bem sucedida!";
+          this.invalidSignMessages.name = null;
+          this.invalidSignMessages.email = null;
+          this.invalidSignMessages.address = null;
+          this.invalidSignMessages.phone = null;
+          this.invalidSignMessages.nif = null;
+          this.invalidSignMessages.password = null;
+
+          this.credentials.oldPassword = "";
+          this.credentials.password = "";
+          this.credentials.password_confirmation = "";
         })
         .catch((error) => {
-          console.log("Invalid Sign Up!");
+          console.log("Invalid UPDATE!");
           console.log(error.response.data);
-          this.invalidSignMessages.mainError = error.response.data.message;
+          this.isError = true;
+          this.invalidSignMessages.mainError = "Falha na atualização!";
           this.invalidSignMessages.name = error.response.data.errors.fullName === undefined ? null : error.response.data.errors.fullName[0];
           this.invalidSignMessages.email = error.response.data.errors.email === undefined ? null : error.response.data.errors.email[0];
           this.invalidSignMessages.address = error.response.data.errors.address === undefined ? null : error.response.data.errors.address[0];
           this.invalidSignMessages.phone = error.response.data.errors.phone === undefined ? null : error.response.data.errors.phone[0];
           this.invalidSignMessages.nif = error.response.data.errors.nif === undefined ? null : error.response.data.errors.nif[0];
           this.invalidSignMessages.password = error.response.data.errors.password === undefined ? null : error.response.data.errors.password[0];
-      });
-
+        });
     },
     mounted() {
       this.reset();
@@ -255,15 +284,21 @@ export default {
 </script>
 
 <style>
-#failed-main-message {
-  color: red;
+#main-message {
   font-size: 20px;
   font-weight: bold;
 }
 
-.failed-message {
-  color: red;
+.secondary-message{
   font-size: 14px;
   font-weight: bold;
+}
+
+.success-message{
+    color: green;
+}
+
+.failed-message {
+  color: red;
 }
 </style>
