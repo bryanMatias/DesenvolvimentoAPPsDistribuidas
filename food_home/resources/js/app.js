@@ -8,8 +8,8 @@ import VueRouter from 'vue-router'
 import Vuex from 'vuex'
 import VueSocketIO from "vue-socket.io"
 
-Vue.use(VueRouter)
-Vue.use(Vuex)
+Vue.use(VueRouter);
+Vue.use(Vuex);
 
 Vue.use(
     new VueSocketIO({

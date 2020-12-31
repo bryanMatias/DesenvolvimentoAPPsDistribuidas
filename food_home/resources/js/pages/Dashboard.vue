@@ -1,9 +1,11 @@
 <template>
   <dashboardED v-if="userRole === 'ED'"></dashboardED>
+  <dashboardEM v-else-if="userRole === 'EM'"></dashboardEM>
 </template>
 
 <script>
 import DashboardEDComponent from "../components/dashboards/deliveryman.vue";
+import DashboardEMComponent from "../components/dashboards/manager.vue";
 
 export default {
   props:["user"],
@@ -19,6 +21,7 @@ export default {
   },
   components: {
     dashboardED: DashboardEDComponent,
+    dashboardEM: DashboardEMComponent,
   },
 };
 </script>

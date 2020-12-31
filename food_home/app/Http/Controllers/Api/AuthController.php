@@ -57,8 +57,7 @@ class AuthController extends Controller
     }
 
     public function signup(Request $request)
-    {
-        
+    { 
         $validatedData = $request->validate([
             'fullName' => ['required', 'regex:/^([a-zA-ZàèìòùÀÈÌÒÙáéíóúýÁÉÍÓÚÝâêîôûÂÊÎÔÛãñõÃÑÕäëïöüÿÄËÏÖÜŸçÇÅå]+\ )*([a-zA-ZàèìòùÀÈÌÒÙáéíóúýÁÉÍÓÚÝâêîôûÂÊÎÔÛãñõÃÑÕäëïöüÿÄËÏÖÜŸçÇÅå]+)$/i'],//mg???
             'email' => ['required', 'email', 'unique:users,email'],

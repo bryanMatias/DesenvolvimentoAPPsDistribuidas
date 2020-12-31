@@ -147,11 +147,6 @@
 <script>
 import { upload } from "../services/file-upload.service";
 
-const STATUS_INITIAL = 0,
-  STATUS_SAVING = 1,
-  STATUS_SUCCESS = 2,
-  STATUS_FAILED = 3;
-
 export default {
   data: function () {
     return {
@@ -180,41 +175,7 @@ export default {
       },
     };
   },
-  computed: {
-    isInitial() {
-      return this.currentStatus === STATUS_INITIAL;
-    },
-    isSaving() {
-      return this.currentStatus === STATUS_SAVING;
-    },
-    isSuccess() {
-      return this.currentStatus === STATUS_SUCCESS;
-    },
-    isFailed() {
-      return this.currentStatus === STATUS_FAILED;
-    },
-  },
   methods: {
-    reset() {
-      // reset form to initial state
-      this.credentials.currentStatus = STATUS_INITIAL;
-      this.credentials.uploadedPhoto = null;
-      this.credentials.uploadError = null;
-    },
-    save(formData) {
-      // upload data to the server
-      this.credentials.currentStatus = STATUS_SAVING;
-
-      upload(formData)
-        .then((x) => {
-          this.credentials.uploadedPhoto = x;
-          this.credentials.currentStatus = STATUS_SUCCESS;
-        })
-        .catch((err) => {
-          this.credentials.uploadError = err.response;
-          this.credentials.currentStatus = STATUS_FAILED;
-        });
-    },
     fileChange(fieldName, files) {
       if (!files) return;
 
@@ -275,9 +236,6 @@ export default {
           this.invalidSignMessages.nif = error.response.data.errors.nif === undefined ? null : error.response.data.errors.nif[0];
           this.invalidSignMessages.password = error.response.data.errors.password === undefined ? null : error.response.data.errors.password[0];
         });
-    },
-    mounted() {
-      this.reset();
     },
   },
 };

@@ -1,9 +1,13 @@
 class SessionManager {
     constructor() {
-        this.users = new Map()
+        this.usersMap = new Map()
+        this.usersList = []
     }
     getUserSession(userID) {
-        return this.users.get(userID)
+        return this.usersMap.get(userID)
+    }
+    getUsersList(){
+        return this.usersList;
     }
     addUserSession(user, socketID) {
         // If already exists a session for this user ID, reuse the session
@@ -18,7 +22,8 @@ class SessionManager {
             user: user,
             socketID: socketID
         }
-        this.users.set(user.id, userSession)
+        this.usersMap.set(user.id, userSession)
+        this.usersList.push(userSession)
         return userSession
     }
     removeUserSession(userID) {
@@ -27,7 +32,9 @@ class SessionManager {
             return null
         }
         let cloneUserSession = Object.assign({}, userSession)
-        this.users.delete(cloneUserSession.user.id)
+        this.usersMap.delete(cloneUserSession.user.id)
+        this.usersList.splice(this.usersList.findIndex(x => x.user.id === cloneUserSession.user.id), 1)
+
         return cloneUserSession
     }
 }

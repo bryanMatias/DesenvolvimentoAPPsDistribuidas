@@ -126,11 +126,11 @@ export default {
         .then((response) => {
           //console.log("Encomenda entregue!");
           //console.log(response.data);
+          this.$socket.emit('order_delivered', this.order);
           this.order = undefined;
           this.customer = undefined;
           this.orderItems = [];
           this.requestOrdersReady();
-          this.$socket.emit('order_delivered', "HI PPL!");
 
         })
         .catch((error) => {
@@ -160,10 +160,11 @@ export default {
         });
     },
     requestNextOrder: function() {
-      axios.put("/api/orders-ready/next", {delviveryman_id: this.deliveryMan.id})
+      axios.put("/api/orders-ready/next", {deliveryman_id: this.deliveryMan.id})
         .then((response) => {
           //console.log("Requested order to deliver!");
           //console.log(response.data);
+          response.data.employee = this.deliveryMan;
           this.$socket.emit('order_requested', response.data);
           this.requestAssignedOrder();
         })

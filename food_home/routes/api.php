@@ -29,6 +29,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 Route::post('login', [AuthController::class, 'login']);
 Route::post('signup', [AuthController::class, 'signup']);
 Route::post('upload-photo', [AuthController::class, 'uploadPhoto']);
+Route::post('upload-photo-product', [ProductController::class, 'uploadPhoto']);
 
 //Rotas protegidas para apenas utilizadores autenticados e não bloqueados
 Route::middleware(['auth:sanctum', 'non-blocked'])->group(function () {
@@ -43,6 +44,9 @@ Route::middleware(['auth:sanctum', 'non-blocked'])->group(function () {
         Route::put('/orders-ready/next', [OrderController::class, 'assignNextOrderReady']);
     });
 
+    //Rotas para Managers...
+
+
 });
 
 //Rotas para todos os utilizadores
@@ -53,17 +57,30 @@ Route::get('/users/{user}', [UserController::class, 'GetUserById']);
 Route::get('/customers', [UserController::class, 'GetAllCustomers']);
 Route::get('/customers/{customer}', [UserController::class, 'GetCustomerById']);
 
+//Rotas para os empregados
+Route::get('/employees', [UserController::class, 'GetAllEmployees']);
+
+//Rotas para os cozinheiros
+Route::get('/cookers', [UserController::class, 'GetAllCookers']);
+
 //Rotas para o homens de entrega
 Route::get('/deliverymans', [UserController::class, 'GetAllDeliveryMans']);
 
+//Rotas para o manager
+Route::get('/managers', [UserController::class, 'GetAllManagers']);
+
 //Rotas para os produtos
 Route::get('/products', [ProductController::class, 'get']);
+Route::post('/products/create', [ProductController::class, 'create']);
+Route::delete('/products/{product}', [ProductController::class, 'destroy']);
+Route::put('/products/{product}', [ProductController::class, 'update']);
 
 //Rotas para as encomendas em geral
 Route::get('/orders', [OrderController::class, 'get']);
 Route::get('/orders/{order}', [OrderController::class, 'getOrderById']);
 Route::get('/orders/{order}/order-items', [OrderController::class, 'getOrderItemsFromOrder']);
 //Route::get('/orders/{order}/order-items/{}', [OrderController::class, 'getOrderItemsFromOrder']);
+Route::get('/active-orders', [OrderController::class, 'getActiveOrders']);
 
 //Rotas para as encomendas prontas para entrega
 Route::get('/orders-ready', [OrderController::class, 'getOrdersReady']);

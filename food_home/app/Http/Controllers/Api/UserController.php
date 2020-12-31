@@ -12,7 +12,9 @@ use Illuminate\Support\Facades\Storage;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Order;
 use App\Models\Customer;
+//use App\Models\DeliveryMan;
 
 class UserController extends Controller
 {
@@ -48,9 +50,30 @@ class UserController extends Controller
         return $customer;
     }
 
+    public function GetAllEmployees()
+    {
+        return User::where('type', '!=', 'C')->get();
+    }
+
+    public function GetAllCookers()
+    {
+        return User::where('type', 'EC')->get();
+    }
+
     public function GetAllDeliveryMans()
     {
-        return User::where('type', 'ED')->get();
+        $delivery_mans = User::where('type', 'ED')->get();
+
+        foreach ($delivery_mans as $delivery_man) {
+            $delivery_man->order = Order::where('delivered_by', $delivery_man->id)->whereNull('closed_at')->first();
+        }
+
+        return $delivery_mans;
+    }
+
+    public function GetAllManagers()
+    {
+        return User::where('type', 'EM')->get();
     }
 
     public function update(Request $request, User $user)

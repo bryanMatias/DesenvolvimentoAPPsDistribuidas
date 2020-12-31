@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\User;
+use App\Models\Product;
 use Carbon\Carbon;
 
 use App\Http\Resources\OrderItem as OrderItemResource;
@@ -14,6 +15,11 @@ use App\Models\DeliveryMan;
 
 class OrderController extends Controller
 {
+
+    /////////////////////////////////////////////
+    /*        FUNÇÕES PARA ORDERS GERAIS       */
+    /////////////////////////////////////////////
+
     public function get()
     {
         return Order::all();
@@ -36,10 +42,33 @@ class OrderController extends Controller
     {
 
         foreach ($order->orderItems as $orderItem) {
-            $orderItem->product;
+            $orderItem->product = Product::withTrashed()->where('id', $orderItem->product_id)->first();
         }
 
         return $order->orderItems;
+    }
+
+    public function getActiveOrders(Request $request)
+    {
+        $orders = Order::whereIn('status', ['H', 'P', 'R', 'T'])
+            ->orderBy('created_at')
+            ->get();
+
+        foreach($orders as $order)
+        {
+            switch($order->status){
+                case 'P':
+                    $order->employee = User::where('id', $order->prepared_by)->first();
+                    break;
+                case 'T':
+                    $order->employee = User::where('id', $order->delivered_by)->first();
+                    break;
+                default:
+                    $order->employee = null;
+            }
+        }
+
+        return $orders;
     }
 
     /////////////////////////////////////////////
@@ -68,7 +97,7 @@ class OrderController extends Controller
         $order->status = 'T';
         $order->current_status_at = $updateTime;
         $order->updated_at = $updateTime;
-        $order->delivered_by = $request->delviveryman_id; //GARANTIR AUTENTICIDADE DESTE ID. Eu podia mandar ID de outro DelviveryMan, como sei que este ID é válido?
+        $order->delivered_by = $request->deliveryman_id; //GARANTIR AUTENTICIDADE DESTE ID. Eu podia mandar ID de outro DelviveryMan, como sei que este ID é válido?
         $order->save();
         
         return $order;
