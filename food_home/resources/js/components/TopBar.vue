@@ -174,6 +174,14 @@ export default {
       this.$emit("logout");
     },
   },
+  sockets:{
+    blocked_user(){
+      this.logout();
+    },
+    order_canceled(){
+      alert("A sua encomenda foi cancelada!");
+    }
+  },
 };
 </script>
 

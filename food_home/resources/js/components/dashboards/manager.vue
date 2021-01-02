@@ -168,7 +168,7 @@
                 <th>Estado atual</th>
                 <th>Empregado</th>
                 <th>Data</th>
-                <th>btn</th>
+                <th>Ações</th>
               </tr>
             </thead>
             <tbody v-if="!searchOrderStatus"> <!-- Se não existem filtros... mostra todos -->
@@ -180,7 +180,7 @@
                   <span v-else>---</span>
                 </td>
                 <td>{{ order.current_status_at }}</td>
-                <td>_btn</td>
+                <td><a class="btn btn-success btn-circle btn-sm" v-on:click.prevent="cancelOrder(order)" title="Cancelar"><i class="fas fa-thumbs-down"></i></a></td>
               </tr>
             </tbody>
             <tbody v-else> <!-- Se existem filtros... -->
@@ -192,7 +192,7 @@
                   <span v-else>---</span>
                 </td>
                 <td>{{ order.current_status_at }}</td>
-                <td>_btn</td>
+                <td><a class="btn btn-success btn-circle btn-sm" v-on:click.prevent="cancelOrder(order)" title="Cancelar"><i class="fas fa-thumbs-down"></i></a></td>
               </tr>
             </tbody>
           </table>
@@ -218,20 +218,18 @@ export default {
     doNothing: function () {
       console.log("Nothing happened!");
     },
-    deliverOrder: function () {
+    cancelOrder: function (order) {
       axios
-        .put(`/api/orders/${this.order.id}/deliver`, {
-          deliverStart: this.orderTimmer,
-        })
+        .put(`/api/orders/${order.id}/cancel`)
         .then((response) => {
-          this.order = undefined;
-          this.customer = undefined;
-          this.orderItems = [];
-          this.requestOrdersReady();
-          this.$socket.emit("order_delivered", "HI PPL!");
+          console.log(order);
+          let index = this.activeOrders.findIndex((x) => x.id === order.id);
+          this.activeOrders.splice(index, 1);
+          console.log(index);
+          this.$socket.emit("order_canceled", order);
         })
         .catch((error) => {
-          console.log("Nao foi possivel entregar a encomenda!");
+          console.log("Nao foi possivel cancelar a encomenda!");
           console.log(error.response.data);
         });
     },

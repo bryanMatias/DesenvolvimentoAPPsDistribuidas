@@ -25,7 +25,7 @@ import DashboardComponent from './pages/Dashboard.vue'
 
 import ProductsComponent from './pages/Products.vue'
 
-import UsersComponent from './developer/Users.vue'
+import UsersComponent from './pages/Users.vue'
 
 import LoginComponent from './pages/login.vue'
 import SignUpComponent from './pages/signup.vue'
@@ -65,10 +65,9 @@ const routes = [
             { path: 'login', component: LoginComponent },
             { path: 'signup', component: SignUpComponent },
             { path: 'edit-profile', component: EditUserComponent },
+            { path: 'users', component: UsersComponent },
         ]
     },
-
-    { path: '/dev/users', component: UsersComponent },
 ]
 
 const router = new VueRouter({

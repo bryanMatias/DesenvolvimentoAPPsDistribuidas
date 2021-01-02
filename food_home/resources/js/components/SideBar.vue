@@ -18,7 +18,7 @@
     <hr class="sidebar-divider my-0" />
 
     <!-- Nav Item - Dashboard -->
-    <li class="nav-item" v-if="isNotClient">
+    <li class="nav-item" v-if="!isClient">
       <a class="nav-link" href="/#/dashboard">
         <i class="fas fa-fw fa-tachometer-alt"></i>
         <span>Dashboard</span></a
@@ -30,6 +30,14 @@
       <a class="nav-link" href="/#/edit-profile">
         <i class="fas fa-fw fa-tachometer-alt"></i>
         <span>Editar Perfil</span></a
+      >
+    </li>
+
+    <!-- Nav Item - Dashboard -->
+    <li class="nav-item" v-if="isManager">
+      <a class="nav-link" href="/#/users">
+        <i class="fas fa-fw fa-tachometer-alt"></i>
+        <span>Gerir utilizadores</span></a
       >
     </li>
 
@@ -157,8 +165,8 @@
 <script>
 export default {
   computed: {
-    isNotClient() {
-      return this.$store.state.user.type != "C";
+    isClient() {
+      return this.$store.state.user.type == "C";
     },
     isManager() {
       return this.$store.state.user.type == "EM";

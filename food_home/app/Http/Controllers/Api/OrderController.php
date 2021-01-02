@@ -71,6 +71,37 @@ class OrderController extends Controller
         return $orders;
     }
 
+    public function cancelOrder(Request $request, Order $order)
+    {
+        $updateTime = now(); //Agora!
+
+        $order->status = 'C';
+        $order->current_status_at = $updateTime;
+        $order->closed_at = $updateTime;
+        $order->updated_at = $updateTime;
+
+        $order->save();
+
+        return $order;
+    }
+
+    ///////////////////////////////////////////////
+    /* FUNÇÕES PARA ORDERS NO ESTADO HOLDING 'H' */
+    ///////////////////////////////////////////////
+
+    public function getOrdersHolding()
+    {
+        $orders = Order::where('status', 'H')
+        ->orderBy('current_status_at', 'DESC')
+        ->get();
+
+/*         foreach ($orders as $order) {
+            $order->customer;
+        } */
+
+        return $orders;
+    }
+
     /////////////////////////////////////////////
     /* FUNÇÕES PARA ORDERS NO ESTADO READY 'R' */
     /////////////////////////////////////////////
@@ -97,7 +128,7 @@ class OrderController extends Controller
         $order->status = 'T';
         $order->current_status_at = $updateTime;
         $order->updated_at = $updateTime;
-        $order->delivered_by = $request->deliveryman_id; //GARANTIR AUTENTICIDADE DESTE ID. Eu podia mandar ID de outro DelviveryMan, como sei que este ID é válido?
+        $order->delivered_by = $request->deliveryman_id;
         $order->save();
         
         return $order;
@@ -142,13 +173,13 @@ class OrderController extends Controller
     {
         //validar se a encomenda é de facto valida para se atualizar... tem que ser feita por um deliveryMan autenticado!
 
-        $updateTime = now();
+        $updateTime = now(); //Agora!
 
-        $startDel = Carbon::parse($request->deliverStart);
-        $deliverDuration = $updateTime->diffInSeconds($startDel);
+        $startDel = Carbon::parse($request->deliverStart);  //Momento em que começou a entrega
+        $deliverDuration = $updateTime->diffInSeconds($startDel); //Duração da entrega
 
-        $orderCreatedAt = Carbon::parse($order->created_at);
-        $totalDuration = $updateTime->diffInSeconds($orderCreatedAt);
+        $orderCreatedAt = Carbon::parse($order->created_at); //Momento de criação da encomenda
+        $totalDuration = $updateTime->diffInSeconds($orderCreatedAt); //Duração total da encomenda
         
         $order->status = 'D';
         $order->current_status_at = $updateTime;
@@ -164,4 +195,5 @@ class OrderController extends Controller
         );
 
     }
+
 }

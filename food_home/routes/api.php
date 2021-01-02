@@ -32,26 +32,31 @@ Route::post('upload-photo', [AuthController::class, 'uploadPhoto']);
 Route::post('upload-photo-product', [ProductController::class, 'uploadPhoto']);
 
 //Rotas protegidas para apenas utilizadores autenticados e não bloqueados
-Route::middleware(['auth:sanctum', 'non-blocked'])->group(function () {
-    Route::get('/user/auth', [UserController::class, 'GetAuthUser']);
+Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('logout', [AuthController::class, 'logout']);
-    Route::put('/user/{user}/update', [UserController::class, 'update']);
 
-    //Rotas para DeliveryMans...
-    Route::middleware(['isDeliveryMan'])->group(function () {
-        Route::get('/deliverymans/{user}/order', [OrderController::class, 'getDeliveryManCurrentOrder']);
-        Route::put('/orders/{order}/deliver', [OrderController::class, 'putOrderTransitToDelivered']);
-        Route::put('/orders-ready/next', [OrderController::class, 'assignNextOrderReady']);
+    Route::middleware(['non-blocked'])->group(function () {
+        Route::get('/user/auth', [UserController::class, 'GetAuthUser']);
+        Route::put('/user/{user}/update', [UserController::class, 'update']);
+    
+        //Rotas para DeliveryMans...
+        Route::middleware(['isDeliveryMan'])->group(function () {
+            Route::get('/deliverymans/{user}/order', [OrderController::class, 'getDeliveryManCurrentOrder']);
+            Route::put('/orders/{order}/deliver', [OrderController::class, 'putOrderTransitToDelivered']);
+            Route::put('/orders-ready/next', [OrderController::class, 'assignNextOrderReady']);
+        });
+    
+        //Rotas para Managers...
+
     });
-
-    //Rotas para Managers...
-
 
 });
 
 //Rotas para todos os utilizadores
 Route::get('/users', [UserController::class, 'GetAllUsers']);
 Route::get('/users/{user}', [UserController::class, 'GetUserById']);
+Route::delete('/users/{user}', [UserController::class, 'destroy']);
+Route::put('/users/{user}/flip-block', [UserController::class, 'flipBlock']);
 
 //Rotas para os clientes
 Route::get('/customers', [UserController::class, 'GetAllCustomers']);
@@ -81,6 +86,11 @@ Route::get('/orders/{order}', [OrderController::class, 'getOrderById']);
 Route::get('/orders/{order}/order-items', [OrderController::class, 'getOrderItemsFromOrder']);
 //Route::get('/orders/{order}/order-items/{}', [OrderController::class, 'getOrderItemsFromOrder']);
 Route::get('/active-orders', [OrderController::class, 'getActiveOrders']);
+Route::put('/orders/{order}/cancel', [OrderController::class, 'cancelOrder']);
+
+//Rotas para as encomendas em espera para preparar
+Route::get('/orders-holding', [OrderController::class, 'getOrdersHolding']);
+Route::get('/cooks/{user}/order', [UserController::class, 'getCookOrder']);
 
 //Rotas para as encomendas prontas para entrega
 Route::get('/orders-ready', [OrderController::class, 'getOrdersReady']);

@@ -60,6 +60,11 @@ class UserController extends Controller
         return User::where('type', 'EC')->get();
     }
 
+    public function getCookOrder(User $user)
+    {
+        return Order::where('status', 'P')->where('prepared_by', $user->id)->first();
+    }
+
     public function GetAllDeliveryMans()
     {
         $delivery_mans = User::where('type', 'ED')->get();
@@ -159,4 +164,62 @@ class UserController extends Controller
         return $user;    
 
     }
+
+    public function destroy(Request $request, User $user)
+    {
+        $hasOrdersAssotiated = false;
+
+        switch($user->type){
+            case 'C':
+                $customer = Customer::where('id', $user->id)->first();
+            
+                //Se houver uma encomenda ativa para este cliente...
+                if(Order::where('customer_id', $user->id)->first()){
+                    $customer->delete();
+                    $hasOrdersAssotiated = true;
+                } else {
+                    $customer->forceDelete();
+                }
+
+                break;
+            
+            case 'EC':
+                if(Order::where('prepared_by', $user->id)->first()){
+                    $hasOrdersAssotiated = true;
+                }
+                break;
+            case 'ED':
+                if(Order::where('delivered_by', $user->id)->first()){
+                    $hasOrdersAssotiated = true;
+                }
+                break;
+            case 'EM':
+                break;
+
+        }
+
+        //Se for cliente...
+        if($hasOrdersAssotiated){
+            $user->delete();
+        } else {
+            $user->forceDelete();
+        }
+
+        return response()->json(
+            ['message' => 'Remoção bem sucedida.'],
+            200
+        );
+
+    }
+
+    public function flipBlock(Request $request, User $user)
+	{
+		$user->blocked = $user->blocked == 1 ? 0 : 1;
+		$user->save();
+        
+        return response()->json(
+            ['message' => 'Utilizador bloqueado.'],
+            200
+        );
+	}
 }
